@@ -469,7 +469,7 @@ Legenda: ⬜ a fazer · 🟨 em andamento · ✅ concluído
 | 0.3 | `docs: adiciona README inicial` | ✅ |
 | 0.4 | `docs: adiciona licença MIT` | ✅ |
 | 0.5 | `docs: adiciona SECURITY.md e CONTRIBUTING.md` | ✅ |
-| 0.6 | `docs(adr): registra ADRs 0001–0004 (Dart full-stack, workspace, SQLite, descoberta UDP)` | ⬜ |
+| 0.6 | `docs(adr): registra ADRs 0001–0004 (Dart full-stack, workspace, SQLite, descoberta UDP)` | ✅ |
 | 0.7 | `chore(repo): adiciona .editorconfig, templates de issue e PR` | ⬜ |
 
 **Pronto quando:** o repositório público estiver com documentação, regras de
