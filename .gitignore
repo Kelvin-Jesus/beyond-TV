@@ -51,6 +51,7 @@ dist/
 .flutter-plugins
 .flutter-plugins-dependencies
 **/generated_plugin_registrant.*
+**/GeneratedPluginRegistrant.*
 coverage/
 *.g.dart.tmp
 .widget_preview/

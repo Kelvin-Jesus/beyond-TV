@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  O servidor Beyond TV roda na LAN em HTTP, com IP definido só em tempo de
+  execução (descoberta ou digitação), e os dashboards exibidos no WebView
+  também podem ser HTTP. O Android não permite liberar texto puro por faixa
+  de IP, então ele fica liberado e só CAs do sistema são confiáveis.
+  Risco aceito no MVP: veja as seções 10 e 15 do plano de desenvolvimento.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
