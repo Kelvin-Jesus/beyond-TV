@@ -6,7 +6,8 @@ environment:
   sdk: ^3.6.0
 
 # Cada pacote listado aqui declara `resolution: workspace` no próprio pubspec.
-workspace: []
+workspace:
+  - packages/beyond_protocol
 
 dev_dependencies:
   lints: ^6.0.0
