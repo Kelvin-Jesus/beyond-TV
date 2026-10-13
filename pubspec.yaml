@@ -7,6 +7,7 @@ environment:
 
 # Cada pacote listado aqui declara `resolution: workspace` no próprio pubspec.
 workspace:
+  - apps/server
   - packages/beyond_protocol
 
 dev_dependencies:
