@@ -33,3 +33,7 @@ envia dados a terceiros.
 
 As convenções de commit e branch estão na
 [seção 11 do plano](docs/PLANO_DE_DESENVOLVIMENTO.md#11-convenções-de-commits-branches-e-versões).
+
+## Licença
+
+Distribuído sob a licença [MIT](LICENSE).
