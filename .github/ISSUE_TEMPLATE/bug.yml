@@ -1,0 +1,41 @@
+name: 🐞 Bug
+description: Algo não funciona como deveria.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ Repositório público: **não** inclua IPs reais, URLs internas, tokens
+        ou prints com dados reais. Use `192.168.0.10` e `example.local`.
+  - type: dropdown
+    id: componente
+    attributes:
+      label: Componente
+      options: [server, dashboard, tv, protocol, outro]
+    validations:
+      required: true
+  - type: input
+    id: versao
+    attributes:
+      label: Versão ou commit
+      placeholder: v0.6.0 ou 1a2b3c4
+  - type: textarea
+    id: passos
+    attributes:
+      label: Passos para reproduzir
+      placeholder: |
+        1. Abra o dashboard…
+        2. Clique em…
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: O que esperava x o que aconteceu
+    validations:
+      required: true
+  - type: textarea
+    id: ambiente
+    attributes:
+      label: Ambiente
+      description: SO do PC, modelo da TV, versão do Android, navegador.

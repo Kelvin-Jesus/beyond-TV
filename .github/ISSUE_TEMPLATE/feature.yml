@@ -1,0 +1,19 @@
+name: ✨ Sugestão
+description: Ideia de funcionalidade ou melhoria.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Qual problema isso resolve?
+      placeholder: Como administrador, quero… para…
+    validations:
+      required: true
+  - type: textarea
+    id: proposta
+    attributes:
+      label: Proposta
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas consideradas

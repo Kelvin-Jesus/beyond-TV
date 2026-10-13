@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Relatar vulnerabilidade de segurança
+    url: https://github.com/abiass/beyond-TV/security/advisories/new
+    about: Não abra issue pública para falhas de segurança. Use o relato privado.
