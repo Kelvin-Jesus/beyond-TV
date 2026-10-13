@@ -1,0 +1,12 @@
+name: beyond_tv_workspace
+description: Raiz do workspace do Beyond TV (não é publicado).
+publish_to: none
+
+environment:
+  sdk: ^3.6.0
+
+# Cada pacote listado aqui declara `resolution: workspace` no próprio pubspec.
+workspace: []
+
+dev_dependencies:
+  lints: ^6.0.0
