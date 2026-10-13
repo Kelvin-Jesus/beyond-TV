@@ -1,0 +1,83 @@
+# =====================================================================
+# Beyond TV — .gitignore
+# Repositório PÚBLICO: na dúvida, ignore. Veja docs/PLANO_DE_DESENVOLVIMENTO.md §10
+# =====================================================================
+
+# ---------- Segredos e configuração local ----------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+secrets/
+**/secrets.*
+
+# ---------- Dados de execução do servidor ----------
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+uploads/
+logs/
+*.log
+
+# ---------- Assinatura Android ----------
+*.jks
+*.keystore
+**/android/key.properties
+**/android/local.properties
+**/android/app/google-services.json
+**/android/app/upload-certificate.*
+
+# ---------- Artefatos de build ----------
+*.apk
+*.aab
+*.ipa
+*.exe
+build/
+dist/
+
+# ---------- Dart / Flutter ----------
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+.flutter-plugins
+.flutter-plugins-dependencies
+**/generated_plugin_registrant.*
+coverage/
+*.g.dart.tmp
+
+# ---------- Android / Gradle ----------
+**/android/.gradle/
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/gradle/wrapper/gradle-wrapper.jar
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+.cxx/
+.externalNativeBuild/
+
+# ---------- IDEs ----------
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json.example
+
+# ---------- Sistema operacional ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
