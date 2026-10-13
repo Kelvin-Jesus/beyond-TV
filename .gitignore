@@ -53,6 +53,7 @@ dist/
 **/generated_plugin_registrant.*
 coverage/
 *.g.dart.tmp
+.widget_preview/
 
 # ---------- Android / Gradle ----------
 **/android/.gradle/

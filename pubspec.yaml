@@ -7,8 +7,9 @@ environment:
 
 # Cada pacote listado aqui declara `resolution: workspace` no próprio pubspec.
 workspace:
+  - apps/dashboard
   - apps/server
   - packages/beyond_protocol
 
 dev_dependencies:
-  lints: ^6.0.0
+  flutter_lints: ^6.0.0
