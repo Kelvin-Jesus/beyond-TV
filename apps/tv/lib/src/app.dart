@@ -1,55 +1,53 @@
-import 'package:beyond_protocol/beyond_protocol.dart';
 import 'package:flutter/material.dart';
 
-/// Cores da marca (as mesmas dos ícones e do banner).
-const brandBackground = Color(0xFF0F172A);
-const brandAccent = Color(0xFF38BDF8);
+import 'pages/server_select_page.dart';
+import 'server/discovery.dart';
+import 'server/server_address.dart';
+import 'server/tv_api.dart';
+import 'theme.dart';
+import 'widgets/tv_page.dart';
 
 class TvApp extends StatelessWidget {
-  const TvApp({super.key});
+  TvApp({super.key, ServerDiscovery? discovery, TvApi? api})
+      : discovery = discovery ?? const UdpServerDiscovery(),
+        api = api ?? TvApi();
+
+  final ServerDiscovery discovery;
+  final TvApi api;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Beyond TV',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: brandAccent,
-          brightness: Brightness.dark,
-          surface: brandBackground,
+      theme: buildTvTheme(),
+      home: Builder(
+        builder: (context) => ServerSelectPage(
+          discovery: discovery,
+          api: api,
+          onSelected: (server) => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => _SelectedServerPage(server),
+            ),
+          ),
         ),
-        scaffoldBackgroundColor: brandBackground,
       ),
-      home: const _SplashPage(),
     );
   }
 }
 
-/// Tela inicial provisória. Na fase 4 ela decide entre pareamento e player.
-class _SplashPage extends StatelessWidget {
-  const _SplashPage();
+/// Provisória: a tela de pareamento chega no próximo passo.
+class _SelectedServerPage extends StatelessWidget {
+  const _SelectedServerPage(this.server);
+
+  final ServerAddress server;
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.tv, size: 96, color: brandAccent),
-            const SizedBox(height: 24),
-            Text('Beyond TV', style: textTheme.displaySmall),
-            const SizedBox(height: 8),
-            Text(
-              'Protocolo v$protocolVersion',
-              style: textTheme.titleMedium?.copyWith(color: Colors.white70),
-            ),
-          ],
-        ),
-      ),
+    return TvPage(
+      title: 'Servidor selecionado',
+      subtitle: '${server.name ?? 'Servidor'} · ${server.hostPort}',
+      children: const [],
     );
   }
 }
