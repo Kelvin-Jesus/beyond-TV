@@ -12,6 +12,7 @@ import 'auth/admins.dart';
 import 'auth/passwords.dart';
 import 'auth/sessions.dart';
 import 'clock.dart';
+import 'devices/devices.dart';
 import 'http/json.dart';
 import 'http/middleware.dart';
 import 'http/rate_limit.dart';
@@ -66,6 +67,12 @@ Handler buildHandler({
   PairingApi(
     sessions: sessions,
     codes: PairingCodeStore(clock: clock),
+    devices: DeviceStore(db),
+    pairLimiter: RateLimiter(
+      maxAttempts: PairingApi.maxPairAttempts,
+      window: const Duration(minutes: 1),
+      clock: clock,
+    ),
   ).addRoutes(router);
 
   return const Pipeline()
