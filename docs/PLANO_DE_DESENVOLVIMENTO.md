@@ -265,6 +265,7 @@ A especificação completa fica em `docs/protocolo.md`. O resumo vem abaixo.
 | POST | `/auth/login` · `/auth/logout` | — / sessão | Login e logout com cookie de sessão. |
 | GET | `/auth/session` | admin | Usuário da sessão atual (`401` se não houver). |
 | POST | `/pairing-codes` | admin | Gera um código. |
+| GET | `/pairing-codes/:code` | admin | Situação do código (`pending`, `paired` ou `expired`). |
 | POST | `/pair` | código | A TV troca o código por um token. |
 | GET/PATCH/DELETE | `/devices[/:id]` | admin | Lista, renomeia ou remove uma TV. |
 | POST | `/devices/:id/commands` | admin | Envia `reload`, `identify`, `screenshot` ou `unpair`. |

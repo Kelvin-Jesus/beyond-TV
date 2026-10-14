@@ -6,15 +6,17 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 import 'api/auth_api.dart';
+import 'api/pairing_api.dart';
 import 'api/setup_api.dart';
 import 'auth/admins.dart';
 import 'auth/passwords.dart';
 import 'auth/sessions.dart';
 import 'clock.dart';
-import 'http/rate_limit.dart';
 import 'http/json.dart';
 import 'http/middleware.dart';
+import 'http/rate_limit.dart';
 import 'http/static_site.dart';
+import 'pairing/pairing_codes.dart';
 
 /// Versão do servidor exposta em `/health`.
 const serverVersion = '0.1.0';
@@ -60,6 +62,10 @@ Handler buildHandler({
       window: const Duration(minutes: 1),
       clock: clock,
     ),
+  ).addRoutes(router);
+  PairingApi(
+    sessions: sessions,
+    codes: PairingCodeStore(clock: clock),
   ).addRoutes(router);
 
   return const Pipeline()
