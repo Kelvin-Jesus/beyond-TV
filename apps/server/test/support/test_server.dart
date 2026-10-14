@@ -18,11 +18,13 @@ class TestServer {
   TestServer._(this.db, this._server);
 
   static Future<TestServer> start({
+    Clock clock = DateTime.now,
     Handler Function(Database db)? handler,
   }) async {
     final db = openDatabase();
     final server = await shelf_io.serve(
-      handler?.call(db) ?? buildHandler(db: db, hasher: fastHasher),
+      handler?.call(db) ??
+          buildHandler(db: db, hasher: fastHasher, clock: clock),
       InternetAddress.loopbackIPv4,
       0,
     );
@@ -75,3 +77,14 @@ String? sessionTokenFrom(http.Response response) {
 Map<String, String> sessionHeader(String token) => {
   'cookie': '$sessionCookieName=$token',
 };
+
+/// Relógio manual para os testes avançarem o tempo.
+class FakeClock {
+  FakeClock([DateTime? start]) : now = start ?? DateTime.utc(2026, 10, 14, 12);
+
+  DateTime now;
+
+  DateTime call() => now;
+
+  void advance(Duration duration) => now = now.add(duration);
+}

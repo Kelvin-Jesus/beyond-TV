@@ -11,6 +11,7 @@ import 'auth/admins.dart';
 import 'auth/passwords.dart';
 import 'auth/sessions.dart';
 import 'clock.dart';
+import 'http/rate_limit.dart';
 import 'http/json.dart';
 import 'http/middleware.dart';
 import 'http/static_site.dart';
@@ -50,11 +51,21 @@ Handler buildHandler({
     sessions: sessions,
     hasher: hasher,
   ).addRoutes(router);
-  AuthApi(admins: admins, sessions: sessions, hasher: hasher).addRoutes(router);
+  AuthApi(
+    admins: admins,
+    sessions: sessions,
+    hasher: hasher,
+    loginLimiter: RateLimiter(
+      maxAttempts: AuthApi.maxFailedLogins,
+      window: const Duration(minutes: 1),
+      clock: clock,
+    ),
+  ).addRoutes(router);
 
   return const Pipeline()
       .addMiddleware(requestLogger())
       .addMiddleware(errorHandler())
+      .addMiddleware(originCheck())
       .addHandler(router.call);
 }
 

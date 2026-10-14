@@ -5,20 +5,34 @@ import '../auth/admins.dart';
 import '../auth/passwords.dart';
 import '../auth/sessions.dart';
 import '../http/json.dart';
+import '../http/rate_limit.dart';
 
 /// Login, logout e consulta da sessão do administrador.
+///
+/// Cada IP pode errar o login [maxFailedLogins] vezes por minuto; depois
+/// disso recebe `429` até a janela passar.
 class AuthApi {
   AuthApi({
     required AdminStore admins,
     required SessionStore sessions,
     required PasswordHasher hasher,
+    RateLimiter? loginLimiter,
   }) : _admins = admins,
        _sessions = sessions,
-       _hasher = hasher;
+       _hasher = hasher,
+       _loginLimiter =
+           loginLimiter ??
+           RateLimiter(
+             maxAttempts: maxFailedLogins,
+             window: const Duration(minutes: 1),
+           );
+
+  static const maxFailedLogins = 5;
 
   final AdminStore _admins;
   final SessionStore _sessions;
   final PasswordHasher _hasher;
+  final RateLimiter _loginLimiter;
 
   /// Hash usado quando o usuário não existe, para a resposta demorar o mesmo
   /// tempo e não revelar quais usuários existem.
@@ -41,12 +55,19 @@ class AuthApi {
     final username = requireString(body, 'username').trim();
     final password = requireString(body, 'password');
 
+    final ip = clientIp(request);
+    _loginLimiter.check(ip);
+
     final admin = _admins.findByUsername(username);
     final valid = await _hasher.verify(
       password,
       admin?.passwordHash ?? await _dummyHash,
     );
-    if (admin == null || !valid) throw invalidLogin;
+    if (admin == null || !valid) {
+      _loginLimiter.hit(ip);
+      throw invalidLogin;
+    }
+    _loginLimiter.reset(ip);
 
     _sessions.purgeExpired();
     final token = _sessions.create(admin.id);

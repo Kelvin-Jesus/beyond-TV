@@ -123,4 +123,44 @@ void main() {
 
     expect(response.statusCode, 200);
   });
+
+  Future<int> attemptLogin(String password) async => (await server.post(
+    '/api/v1/auth/login',
+    json: {'username': 'admin', 'password': password},
+  )).statusCode;
+
+  test('bloqueia o IP após 5 logins errados por minuto', () async {
+    for (var i = 0; i < AuthApi.maxFailedLogins; i++) {
+      expect(await attemptLogin('senha-errada'), 401);
+    }
+
+    final blocked = await server.post(
+      '/api/v1/auth/login',
+      json: {'username': 'admin', 'password': 'senha-forte-1'},
+    );
+    expect(blocked.statusCode, 429);
+    expect(errorCode(blocked), 'too_many_requests');
+    expect(int.parse(blocked.headers['retry-after']!), inInclusiveRange(1, 60));
+  });
+
+  test('login certo zera o contador de erros', () async {
+    for (var i = 0; i < AuthApi.maxFailedLogins - 1; i++) {
+      await attemptLogin('senha-errada');
+    }
+    await login();
+
+    expect(await attemptLogin('senha-errada'), 401);
+    expect(await attemptLogin('senha-errada'), 401);
+  });
+
+  test('recusa login vindo de outra origem', () async {
+    final response = await server.post(
+      '/api/v1/auth/login',
+      headers: {'origin': 'http://evil.example'},
+      json: {'username': 'admin', 'password': 'senha-forte-1'},
+    );
+
+    expect(response.statusCode, 403);
+    expect(response.headers['set-cookie'], isNull);
+  });
 }

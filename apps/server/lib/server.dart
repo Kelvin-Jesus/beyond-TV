@@ -1,6 +1,8 @@
 /// Servidor local do Beyond TV.
 library;
 
+export 'src/api/auth_api.dart';
+export 'src/api/setup_api.dart';
 export 'src/app.dart';
 export 'src/auth/admins.dart';
 export 'src/auth/passwords.dart';
@@ -13,4 +15,5 @@ export 'src/db/migrations/migrations.dart';
 export 'src/db/migrator.dart';
 export 'src/http/json.dart';
 export 'src/http/middleware.dart';
+export 'src/http/rate_limit.dart';
 export 'src/logging.dart';
