@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:beyond_protocol/beyond_protocol.dart';
+import 'package:beyond_tv/src/device/credentials.dart';
 import 'package:beyond_tv/src/device/device_info_source.dart';
 import 'package:beyond_tv/src/server/discovery.dart';
 import 'package:beyond_tv/src/server/server_address.dart';
@@ -83,4 +84,20 @@ void useTvScreen(WidgetTester tester) {
     ..physicalSize = const Size(1920, 1080)
     ..devicePixelRatio = 2;
   addTearDown(tester.view.reset);
+}
+
+/// Armazenamento de credenciais em memória.
+class MemoryCredentialStore implements CredentialStore {
+  MemoryCredentialStore([this.saved]);
+
+  Credentials? saved;
+
+  @override
+  Future<Credentials?> load() async => saved;
+
+  @override
+  Future<void> save(Credentials credentials) async => saved = credentials;
+
+  @override
+  Future<void> clear() async => saved = null;
 }

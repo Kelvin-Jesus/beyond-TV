@@ -11,7 +11,11 @@ void main() {
   ) async {
     useTvScreen(tester);
     await tester.pumpWidget(
-      TvApp(discovery: FakeDiscovery([pcSala]), api: fakeApi()),
+      TvApp(
+        credentials: MemoryCredentialStore(),
+        discovery: FakeDiscovery([pcSala]),
+        api: fakeApi(),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -28,7 +32,13 @@ void main() {
 
   testWidgets('sem servidores explica e foca em "Digitar IP"', (tester) async {
     final discovery = FakeDiscovery();
-    await tester.pumpWidget(TvApp(discovery: discovery, api: fakeApi()));
+    await tester.pumpWidget(
+      TvApp(
+        credentials: MemoryCredentialStore(),
+        discovery: discovery,
+        api: fakeApi(),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Nenhum servidor encontrado'), findsOneWidget);
@@ -50,7 +60,11 @@ void main() {
     Future<void> openManual(WidgetTester tester) async {
       useTvScreen(tester);
       await tester.pumpWidget(
-        TvApp(discovery: FakeDiscovery(), api: fakeApi()),
+        TvApp(
+          credentials: MemoryCredentialStore(),
+          discovery: FakeDiscovery(),
+          api: fakeApi(),
+        ),
       );
       await tester.pumpAndSettle();
       await tester.tap(find.text('Digitar IP'));

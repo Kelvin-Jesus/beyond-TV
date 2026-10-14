@@ -11,6 +11,7 @@ import '../support/fakes.dart';
 
 void main() {
   late List<PairRequest> requests;
+  late MemoryCredentialStore store;
 
   http.Response Function(http.Request) pairWith(http.Response response) =>
       (request) {
@@ -33,7 +34,10 @@ void main() {
     201,
   );
 
-  setUp(() => requests = []);
+  setUp(() {
+    requests = [];
+    store = MemoryCredentialStore();
+  });
 
   /// Abre o app já na tela de pareamento do PC-SALA.
   Future<void> openPairing(
@@ -44,6 +48,7 @@ void main() {
     useTvScreen(tester);
     await tester.pumpWidget(
       TvApp(
+        credentials: store,
         discovery: FakeDiscovery([pcSala]),
         deviceInfo: const FakeDeviceInfo(),
         api: fakeApi(
@@ -110,6 +115,12 @@ void main() {
     expect(requests.single.code, 'K7M4QX');
     expect(requests.single.deviceInfo.model, 'X1');
     expect(find.text('TV pareada!'), findsOneWidget);
+
+    final saved = store.saved!;
+    expect(saved.deviceId, 'tv1');
+    expect(saved.deviceToken, 'token');
+    expect(saved.server.serverId, 'abc');
+    expect(saved.server.hostPort, '192.168.0.10:8787');
   });
 
   testWidgets('ignora teclas fora do alfabeto e apaga com Backspace', (
@@ -137,6 +148,7 @@ void main() {
 
     expect(find.text('Código expirado.'), findsOneWidget);
     expect(slots(tester), '');
+    expect(store.saved, isNull);
     expect(find.text('Parear esta TV'), findsOneWidget);
   });
 
