@@ -31,8 +31,16 @@ Future<void> main(List<String> args) async {
   await Directory(dataDir).create(recursive: true);
   final db = openDatabase(p.join(dataDir, databaseFileName));
 
+  if (!Directory(config.webDir).existsSync()) {
+    log.warning(
+      LogEvent('dashboard não compilado; rode "flutter build web"', {
+        'webDir': Directory(config.webDir).absolute.path,
+      }),
+    );
+  }
+
   final server = await shelf_io.serve(
-    buildHandler(),
+    buildHandler(webDir: config.webDir),
     InternetAddress.anyIPv4,
     config.port,
   );

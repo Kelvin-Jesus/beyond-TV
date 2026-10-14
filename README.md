@@ -37,15 +37,17 @@ flutter pub get        # na raiz: resolve todo o workspace de uma vez
 | O quê | Comando | Resultado |
 |-------|---------|-----------|
 | Servidor | `dart run apps/server/bin/server.dart` | `http://localhost:8787/health` |
+| Dashboard pelo servidor | `cd apps/dashboard && flutter build web`, depois rode o servidor | `http://localhost:8787/` |
 | Dashboard | `cd apps/dashboard && flutter run -d chrome` | Abre o painel no Chrome |
 | App da TV | `cd apps/tv && flutter run` | Instala no emulador/TV conectada |
 | APK de debug | `cd apps/tv && flutter build apk --debug` | `apps/tv/build/app/outputs/flutter-apk/` |
 | Análise | `flutter analyze` (na raiz) | Analisa todos os pacotes |
 | Testes | `dart test` ou `flutter test` dentro de cada pacote | |
 
-O servidor aceita `--port`, `--data-dir` e `--log-level` (ou as variáveis
-`BEYOND_PORT`, `BEYOND_DATA_DIR` e `BEYOND_LOG_LEVEL`, veja o
-[.env.example](.env.example)). Use
+O servidor aceita `--port`, `--data-dir`, `--web-dir` e `--log-level` (ou as
+variáveis `BEYOND_PORT`, `BEYOND_DATA_DIR`, `BEYOND_WEB_DIR` e
+`BEYOND_LOG_LEVEL`, veja o [.env.example](.env.example)). Os caminhos
+padrão consideram que o servidor roda a partir da raiz do repositório. Use
 `dart run apps/server/bin/server.dart --help` para ver todas as opções.
 
 ### Problemas conhecidos no Windows

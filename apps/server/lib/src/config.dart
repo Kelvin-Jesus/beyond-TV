@@ -7,6 +7,9 @@ const defaultHttpPort = 8787;
 /// Pasta padrão dos dados de execução, relativa ao diretório atual.
 const defaultDataDir = 'data';
 
+/// Pasta padrão do build do dashboard, relativa à raiz do repositório.
+const defaultWebDir = 'apps/dashboard/build/web';
+
 /// Níveis de log aceitos em `--log-level`, do mais ao menos detalhado.
 const logLevels = {
   'debug': Level.FINE,
@@ -33,6 +36,7 @@ class ServerConfig {
   const ServerConfig({
     this.port = defaultHttpPort,
     this.dataDir = defaultDataDir,
+    this.webDir = defaultWebDir,
     this.logLevel = Level.INFO,
   });
 
@@ -60,6 +64,7 @@ class ServerConfig {
     return ServerConfig(
       port: _parsePort(option('port', 'BEYOND_PORT')),
       dataDir: option('data-dir', 'BEYOND_DATA_DIR') ?? defaultDataDir,
+      webDir: option('web-dir', 'BEYOND_WEB_DIR') ?? defaultWebDir,
       logLevel: _parseLogLevel(option('log-level', 'BEYOND_LOG_LEVEL')),
     );
   }
@@ -72,6 +77,9 @@ class ServerConfig {
 
   /// Pasta onde ficam o banco, as mídias e os logs.
   final String dataDir;
+
+  /// Pasta com o build do dashboard (`flutter build web`).
+  final String webDir;
 
   /// Nível mínimo das mensagens de log.
   final Level logLevel;
@@ -112,6 +120,13 @@ class ServerConfig {
           'Pasta de dados (banco, mídias e logs). '
           'Variável de ambiente: BEYOND_DATA_DIR.',
       valueHelp: defaultDataDir,
+    )
+    ..addOption(
+      'web-dir',
+      help:
+          'Pasta do build do dashboard. '
+          'Variável de ambiente: BEYOND_WEB_DIR.',
+      valueHelp: defaultWebDir,
     )
     ..addOption(
       'log-level',

@@ -1,16 +1,35 @@
+import 'dart:io';
+
 import 'package:beyond_protocol/beyond_protocol.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 import 'http/json.dart';
 import 'http/middleware.dart';
+import 'http/static_site.dart';
 
 /// Versão do servidor exposta em `/health`.
 const serverVersion = '0.1.0';
 
 /// Monta o handler HTTP completo do servidor.
-Handler buildHandler() {
-  final router = Router(notFoundHandler: _notFound)..get('/health', _health);
+///
+/// As rotas da API ficam em `/health`, `/api/` e `/ws/`. O resto é o
+/// dashboard, servido de [webDir] quando a pasta existe.
+Handler buildHandler({String? webDir}) {
+  final Handler site = switch (webDir) {
+    final dir? when Directory(dir).existsSync() => staticSiteHandler(dir),
+    final dir? =>
+      (request) => request.url.path.isEmpty
+          ? dashboardMissing(dir)
+          : throw const ApiException.notFound(),
+    null => (_) => throw const ApiException.notFound(),
+  };
+
+  final router = Router(
+    notFoundHandler: (request) => _isApiPath(request.url.path)
+        ? throw const ApiException.notFound()
+        : site(request),
+  )..get('/health', _health);
 
   return const Pipeline()
       .addMiddleware(requestLogger())
@@ -18,10 +37,14 @@ Handler buildHandler() {
       .addHandler(router.call);
 }
 
+bool _isApiPath(String path) =>
+    path == 'api' ||
+    path.startsWith('api/') ||
+    path == 'ws' ||
+    path.startsWith('ws/');
+
 Response _health(Request request) => jsonResponse({
   'status': 'ok',
   'version': serverVersion,
   'protocol': protocolVersion,
 });
-
-Response _notFound(Request request) => throw const ApiException.notFound();

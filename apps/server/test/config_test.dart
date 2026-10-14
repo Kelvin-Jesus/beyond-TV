@@ -9,16 +9,22 @@ void main() {
 
       expect(config.port, defaultHttpPort);
       expect(config.dataDir, defaultDataDir);
+      expect(config.webDir, defaultWebDir);
     });
 
     test('lê as variáveis de ambiente', () {
       final config = ServerConfig.parse(
         [],
-        environment: {'BEYOND_PORT': '9000', 'BEYOND_DATA_DIR': '/srv/beyond'},
+        environment: {
+          'BEYOND_PORT': '9000',
+          'BEYOND_DATA_DIR': '/srv/beyond',
+          'BEYOND_WEB_DIR': '/srv/web',
+        },
       )!;
 
       expect(config.port, 9000);
       expect(config.dataDir, '/srv/beyond');
+      expect(config.webDir, '/srv/web');
     });
 
     test('argumentos têm prioridade sobre o ambiente', () {
