@@ -461,7 +461,7 @@ erDiagram
 
 Legenda: ⬜ a fazer · 🟨 em andamento · ✅ concluído
 
-### Fase 0 — Fundação do repositório 🟨
+### Fase 0 — Fundação do repositório ✅
 | # | Commit | Status |
 |---|--------|--------|
 | 0.1 | `chore(repo): adiciona .gitignore com proteções para repositório público` | ✅ |
@@ -475,16 +475,16 @@ Legenda: ⬜ a fazer · 🟨 em andamento · ✅ concluído
 **Pronto quando:** o repositório público estiver com documentação, regras de
 segurança e GitHub configurado (secret scanning, proteção de branch).
 
-### Fase 1 — Esqueleto do monorepo 🟨
-| # | Commit |
-|---|--------|
-| 1.1 | `build: cria workspace Dart na raiz` |
-| 1.2 | `feat(protocol): cria pacote beyond_protocol com envelope de mensagens` |
-| 1.3 | `feat(server): cria servidor shelf com rota /health` |
-| 1.4 | `feat(dashboard): cria app Flutter Web vazio` |
-| 1.5 | `feat(tv): cria app Flutter Android TV com manifesto leanback e banner` |
-| 1.6 | `ci: adiciona workflow com analyze, test e gitleaks` |
-| 1.7 | `docs: documenta como rodar cada app localmente` |
+### Fase 1 — Esqueleto do monorepo ✅
+| # | Commit | Status |
+|---|--------|--------|
+| 1.1 | `build: cria workspace Dart na raiz` | ✅ |
+| 1.2 | `feat(protocol): cria pacote beyond_protocol com envelope de mensagens` | ✅ |
+| 1.3 | `feat(server): cria servidor shelf com rota /health` | ✅ |
+| 1.4 | `feat(dashboard): cria app Flutter Web vazio` | ✅ |
+| 1.5 | `feat(tv): cria app Flutter Android TV com manifesto leanback e banner` | ✅ |
+| 1.6 | `ci: adiciona workflow com analyze, test e gitleaks` | ✅ |
+| 1.7 | `docs: documenta como rodar cada app localmente` | ✅ |
 
 **Pronto quando:** `dart run apps/server/bin/server.dart` responder `/health`, o
 dashboard abrir no Chrome, o APK de debug instalar no emulador TV e o CI estiver
