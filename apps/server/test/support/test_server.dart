@@ -62,3 +62,16 @@ Object? jsonBody(http.Response response) => jsonDecode(response.body);
 /// Código de erro (`error.code`) de [response].
 Object? errorCode(http.Response response) =>
     (jsonBody(response)! as Map)['error']['code'];
+
+/// Token do cookie de sessão gravado por [response], se houver.
+String? sessionTokenFrom(http.Response response) {
+  final match = RegExp(
+    '$sessionCookieName=([^;]*)',
+  ).firstMatch(response.headers['set-cookie'] ?? '');
+  return match?.group(1);
+}
+
+/// Cabeçalho `Cookie` com a sessão [token].
+Map<String, String> sessionHeader(String token) => {
+  'cookie': '$sessionCookieName=$token',
+};

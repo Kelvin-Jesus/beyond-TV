@@ -3,18 +3,25 @@ import 'package:shelf_router/shelf_router.dart';
 
 import '../auth/admins.dart';
 import '../auth/passwords.dart';
+import '../auth/sessions.dart';
 import '../http/json.dart';
 
 /// Rotas da configuração inicial (criação do administrador).
 ///
 /// O `POST /api/v1/setup` só funciona enquanto não existe administrador: não
-/// há senha padrão, quem abre o dashboard pela primeira vez cria a sua.
+/// há senha padrão, quem abre o dashboard pela primeira vez cria a sua. O
+/// administrador criado já sai com a sessão aberta.
 class SetupApi {
-  SetupApi({required AdminStore admins, required PasswordHasher hasher})
-    : _admins = admins,
-      _hasher = hasher;
+  SetupApi({
+    required AdminStore admins,
+    required SessionStore sessions,
+    required PasswordHasher hasher,
+  }) : _admins = admins,
+       _sessions = sessions,
+       _hasher = hasher;
 
   final AdminStore _admins;
+  final SessionStore _sessions;
   final PasswordHasher _hasher;
 
   void addRoutes(Router router) {
@@ -40,7 +47,12 @@ class SetupApi {
     final admin = _admins.createFirst(username, hash);
     if (admin == null) throw _alreadyConfigured;
 
-    return jsonResponse({'username': admin.username}, status: 201);
+    final token = _sessions.create(admin.id);
+    return jsonResponse(
+      {'username': admin.username},
+      status: 201,
+      headers: {'set-cookie': _sessions.cookieFor(token)},
+    );
   }
 
   static const _alreadyConfigured = ApiException.conflict(

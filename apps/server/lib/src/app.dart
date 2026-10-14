@@ -5,9 +5,12 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:sqlite3/sqlite3.dart';
 
+import 'api/auth_api.dart';
 import 'api/setup_api.dart';
 import 'auth/admins.dart';
 import 'auth/passwords.dart';
+import 'auth/sessions.dart';
+import 'clock.dart';
 import 'http/json.dart';
 import 'http/middleware.dart';
 import 'http/static_site.dart';
@@ -23,6 +26,7 @@ Handler buildHandler({
   required Database db,
   String? webDir,
   PasswordHasher hasher = const PasswordHasher(),
+  Clock clock = DateTime.now,
 }) {
   final Handler site = switch (webDir) {
     final dir? when Directory(dir).existsSync() => staticSiteHandler(dir),
@@ -39,7 +43,14 @@ Handler buildHandler({
         : site(request),
   )..get('/health', _health);
 
-  SetupApi(admins: AdminStore(db), hasher: hasher).addRoutes(router);
+  final admins = AdminStore(db);
+  final sessions = SessionStore(db, clock: clock);
+  SetupApi(
+    admins: admins,
+    sessions: sessions,
+    hasher: hasher,
+  ).addRoutes(router);
+  AuthApi(admins: admins, sessions: sessions, hasher: hasher).addRoutes(router);
 
   return const Pipeline()
       .addMiddleware(requestLogger())

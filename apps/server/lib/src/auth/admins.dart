@@ -48,12 +48,6 @@ class AdminStore {
     ),
   );
 
-  Admin? findById(int id) => _first(
-    _db.select('SELECT id, username, password_hash FROM admins WHERE id = ?', [
-      id,
-    ]),
-  );
-
   static Admin? _first(ResultSet rows) => rows.isEmpty
       ? null
       : Admin(

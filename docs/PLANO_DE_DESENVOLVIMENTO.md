@@ -263,6 +263,7 @@ A especificação completa fica em `docs/protocolo.md`. O resumo vem abaixo.
 | GET | `/setup/status` | — | Indica se a configuração inicial já foi feita. |
 | POST | `/setup` | — (só na 1ª vez) | Cria o administrador. |
 | POST | `/auth/login` · `/auth/logout` | — / sessão | Login e logout com cookie de sessão. |
+| GET | `/auth/session` | admin | Usuário da sessão atual (`401` se não houver). |
 | POST | `/pairing-codes` | admin | Gera um código. |
 | POST | `/pair` | código | A TV troca o código por um token. |
 | GET/PATCH/DELETE | `/devices[/:id]` | admin | Lista, renomeia ou remove uma TV. |
