@@ -475,7 +475,7 @@ Legenda: ⬜ a fazer · 🟨 em andamento · ✅ concluído
 **Pronto quando:** o repositório público estiver com documentação, regras de
 segurança e GitHub configurado (secret scanning, proteção de branch).
 
-### Fase 1 — Esqueleto do monorepo ⬜
+### Fase 1 — Esqueleto do monorepo 🟨
 | # | Commit |
 |---|--------|
 | 1.1 | `build: cria workspace Dart na raiz` |
@@ -614,9 +614,11 @@ segurança e as regras. Na UI, o foco é o que tem lógica.
 
 ### Pré-requisitos
 
-- **Flutter SDK (stable)** com Dart ≥ 3.6. ⚠️ *Não estava instalado no PATH
-  desta máquina quando o plano foi escrito.*
-- Android Studio com Android SDK, **imagem de emulador Android TV** e `adb`.
+- **Flutter SDK (stable)** com Dart ≥ 3.6.
+- Android Studio com Android SDK, **NDK** (versão pedida pelo Flutter),
+  **imagem de emulador Android TV** e `adb`.
+- Projeto num caminho **sem acentos**: o `dart test` em workspaces e o Gradle
+  falham com caminhos como `Área de Trabalho`. Veja o README.
 - Git e, opcionalmente, GitHub CLI (`gh`).
 - Chrome, para depurar o dashboard.
 

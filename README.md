@@ -24,6 +24,45 @@ controla várias TVs Android a partir de um painel web que roda no seu próprio 
 | `apps/tv` | Player para Android TV | Flutter (Android) |
 | `packages/beyond_protocol` | Modelos compartilhados | Dart |
 
+## Rodando localmente
+
+Pré-requisitos: Flutter SDK (stable, Dart ≥ 3.6) e, para o app da TV, Android
+SDK com o emulador Android TV. Detalhes na
+[seção 14 do plano](docs/PLANO_DE_DESENVOLVIMENTO.md#14-ambiente-de-desenvolvimento).
+
+```sh
+flutter pub get        # na raiz: resolve todo o workspace de uma vez
+```
+
+| O quê | Comando | Resultado |
+|-------|---------|-----------|
+| Servidor | `dart run apps/server/bin/server.dart` | `http://localhost:8787/health` |
+| Dashboard | `cd apps/dashboard && flutter run -d chrome` | Abre o painel no Chrome |
+| App da TV | `cd apps/tv && flutter run` | Instala no emulador/TV conectada |
+| APK de debug | `cd apps/tv && flutter build apk --debug` | `apps/tv/build/app/outputs/flutter-apk/` |
+| Análise | `flutter analyze` (na raiz) | Analisa todos os pacotes |
+| Testes | `dart test` ou `flutter test` dentro de cada pacote | |
+
+### Problemas conhecidos no Windows
+
+- **Caminho com acento ou espaço** (ex.: `Área de Trabalho`): o `dart test`
+  falha com *"package_config.json did not contain its own root package"* e o
+  Gradle também costuma se perder. Clone o projeto num caminho simples, como
+  `C:\dev\beyond-TV`, ou crie uma unidade virtual:
+
+  ```powershell
+  subst X: "C:\caminho\com\acento"   # depois trabalhe a partir de X:\
+  subst X: /D                         # remove a unidade
+  ```
+
+- **NDK ausente** (*"sdkmanager did not install NDK …"*): instale a versão
+  pedida no erro pelo Android Studio (*SDK Manager → SDK Tools → NDK*) ou por
+  linha de comando, com aspas por causa do `;`:
+
+  ```powershell
+  sdkmanager --sdk_root=<pasta-do-sdk> "ndk;<versão>"
+  ```
+
 ## Privacidade
 
 Tudo roda **na sua rede local**. O projeto não usa nuvem nem telemetria e não
