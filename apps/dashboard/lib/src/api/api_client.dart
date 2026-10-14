@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:beyond_protocol/beyond_protocol.dart';
 import 'package:http/http.dart' as http;
 
 /// Erro devolvido pela API (ou falha de rede), com mensagem pronta para
@@ -63,6 +64,16 @@ class ApiClient {
 
   Future<void> logout() => _send('POST', '/api/v1/auth/logout');
 
+  /// Gera um código de pareamento para a TV digitar.
+  Future<PairingCode> createPairingCode() async =>
+      PairingCode.fromJson(await _send('POST', '/api/v1/pairing-codes'));
+
+  /// Situação do código [code]: se a TV já pareou, traz o nome dela.
+  Future<PairingStatus> pairingStatus(String code) async =>
+      PairingStatus.fromJson(
+        await _send('GET', '/api/v1/pairing-codes/$code'),
+      );
+
   Future<String> _sendCredentials(
     String path,
     String username,
@@ -118,4 +129,24 @@ class ApiClient {
       return const {};
     }
   }
+}
+
+/// Situação de um código de pareamento.
+enum PairingState { pending, paired, expired }
+
+class PairingStatus {
+  const PairingStatus(this.state, {this.deviceName});
+
+  factory PairingStatus.fromJson(Map<String, Object?> json) => PairingStatus(
+        PairingState.values.firstWhere(
+          (state) => state.name == json['status'],
+          orElse: () => PairingState.expired,
+        ),
+        deviceName: json['deviceName'] as String?,
+      );
+
+  final PairingState state;
+
+  /// Nome dado à TV no pareamento (fabricante e modelo).
+  final String? deviceName;
 }
