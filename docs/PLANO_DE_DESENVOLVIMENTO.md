@@ -506,14 +506,14 @@ verde.
 | 2.4 | `feat(server): adiciona logging estruturado e tratamento de erros` | ✅ |
 | 2.5 | `feat(server): serve build estático do dashboard` | ✅ |
 
-### Fase 3 — Autenticação do administrador ⬜
-| # | Commit |
-|---|--------|
-| 3.1 | `feat(server): adiciona setup inicial e criação de admin com bcrypt` |
-| 3.2 | `feat(server): adiciona login/logout com sessão em cookie seguro` |
-| 3.3 | `feat(server): adiciona rate limit e checagem de Origin` |
-| 3.4 | `feat(dashboard): adiciona telas de setup inicial e login` |
-| 3.5 | `test(server): cobre fluxos de setup, login e sessão expirada` |
+### Fase 3 — Autenticação do administrador ✅
+| # | Commit | Status |
+|---|--------|--------|
+| 3.1 | `feat(server): adiciona setup inicial e criação de admin com bcrypt` | ✅ |
+| 3.2 | `feat(server): adiciona login/logout com sessão em cookie seguro` | ✅ |
+| 3.3 | `feat(server): adiciona rate limit e checagem de Origin` | ✅ |
+| 3.4 | `feat(dashboard): adiciona telas de setup inicial e login` | ✅ |
+| 3.5 | `test(server): cobre fluxos de setup, login e sessão expirada` | ✅ |
 
 ### Fase 4 — Pareamento ⬜
 | # | Commit |
