@@ -55,6 +55,17 @@ O servidor aceita `--port`, `--discovery-port`, `--data-dir`, `--web-dir` e
 roda a partir da raiz do repositório. Use
 `dart run apps/server/bin/server.dart --help` para ver todas as opções.
 
+### Pareando uma TV em desenvolvimento
+
+1. Rode o servidor e abra `http://localhost:8787/` (com o dashboard
+   compilado). Na primeira vez, crie o administrador.
+2. Clique em **Adicionar TV** e anote o código.
+3. Abra o app na TV. Ele procura o servidor na rede; escolha-o e digite o
+   código. No **emulador** a descoberta não alcança o PC: use **Digitar IP**
+   com `10.0.2.2` (o endereço do PC visto de dentro do emulador).
+
+Detalhes do fluxo em [docs/protocolo.md](docs/protocolo.md).
+
 ### Problemas conhecidos no Windows
 
 - **Caminho com acento ou espaço** (ex.: `Área de Trabalho`): o `dart test`
@@ -73,6 +84,15 @@ roda a partir da raiz do repositório. Use
 
   ```powershell
   sdkmanager --sdk_root=<pasta-do-sdk> "ndk;<versão>"
+  ```
+
+- **Kotlin "Could not close incremental caches"** no `flutter build apk`:
+  acontece quando o projeto e o cache do pub estão em discos diferentes
+  (ex.: `C:` e `D:`). Desligue a compilação incremental do Kotlin nesse
+  build:
+
+  ```powershell
+  flutter build apk --debug --android-project-arg=kotlin.incremental=false
   ```
 
 ## Privacidade
