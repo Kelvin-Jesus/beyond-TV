@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:beyond_protocol/beyond_protocol.dart';
 import 'package:http/http.dart' as http;
 
 import 'server_address.dart';
@@ -31,6 +32,22 @@ class TvApi {
   Future<void> checkServer(ServerAddress server) async {
     final json = await _send(http.Request('GET', server.resolve('/health')));
     if (json['status'] != 'ok') throw _notBeyondServer;
+  }
+
+  /// Troca o código de pareamento pelas credenciais da TV.
+  ///
+  /// Os erros do servidor (código inválido, expirado, muitas tentativas)
+  /// chegam como [TvApiException] com a mensagem pronta para a tela.
+  Future<PairResponse> pair(ServerAddress server, PairRequest pair) async {
+    final request = http.Request('POST', server.resolve('/api/v1/pair'))
+      ..headers['content-type'] = 'application/json'
+      ..body = jsonEncode(pair.toJson());
+    final json = await _send(request);
+    try {
+      return PairResponse.fromJson(json);
+    } on ProtocolException {
+      throw _notBeyondServer;
+    }
   }
 
   /// Envia [request] e devolve o corpo JSON.

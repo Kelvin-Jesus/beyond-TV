@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   beyond_protocol: any
+  device_info_plus: ^13.3.0
   flutter:
     sdk: flutter
   http: ^1.6.0

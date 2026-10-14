@@ -1,8 +1,12 @@
 import 'dart:convert';
 
+import 'package:beyond_protocol/beyond_protocol.dart';
+import 'package:beyond_tv/src/device/device_info_source.dart';
 import 'package:beyond_tv/src/server/discovery.dart';
 import 'package:beyond_tv/src/server/server_address.dart';
 import 'package:beyond_tv/src/server/tv_api.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
@@ -51,3 +55,32 @@ const pcSala = ServerAddress(
   name: 'PC-SALA',
   serverId: 'abc',
 );
+
+/// Dados fixos da TV.
+class FakeDeviceInfo implements DeviceInfoSource {
+  const FakeDeviceInfo();
+
+  @override
+  Future<DeviceInfo> read() async => const DeviceInfo(
+        appVersion: appVersion,
+        manufacturer: 'Acme',
+        model: 'X1',
+      );
+}
+
+/// Resposta JSON de erro no formato da API.
+http.Response apiError(int status, String code, String message) =>
+    http.Response(
+      jsonEncode({
+        'error': {'code': code, 'message': message},
+      }),
+      status,
+    );
+
+/// Simula a tela de uma Android TV 1080p (960×540 dp).
+void useTvScreen(WidgetTester tester) {
+  tester.view
+    ..physicalSize = const Size(1920, 1080)
+    ..devicePixelRatio = 2;
+  addTearDown(tester.view.reset);
+}

@@ -9,6 +9,7 @@ void main() {
   testWidgets('lista os servidores encontrados com foco no primeiro', (
     tester,
   ) async {
+    useTvScreen(tester);
     await tester.pumpWidget(
       TvApp(discovery: FakeDiscovery([pcSala]), api: fakeApi()),
     );
@@ -21,7 +22,8 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.select);
     await tester.pumpAndSettle();
 
-    expect(find.text('Servidor selecionado'), findsOneWidget);
+    expect(find.text('Parear esta TV'), findsOneWidget);
+    expect(find.text('Servidor: PC-SALA · 192.168.0.10:8787'), findsOneWidget);
   });
 
   testWidgets('sem servidores explica e foca em "Digitar IP"', (tester) async {
@@ -46,6 +48,7 @@ void main() {
 
   group('IP manual', () {
     Future<void> openManual(WidgetTester tester) async {
+      useTvScreen(tester);
       await tester.pumpWidget(
         TvApp(discovery: FakeDiscovery(), api: fakeApi()),
       );
@@ -61,7 +64,7 @@ void main() {
       await tester.tap(find.text('Conectar'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Servidor selecionado'), findsOneWidget);
+      expect(find.text('Parear esta TV'), findsOneWidget);
       expect(find.textContaining('192.168.0.10:8787'), findsOneWidget);
     });
 
