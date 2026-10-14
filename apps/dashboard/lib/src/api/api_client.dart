@@ -1,0 +1,121 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+/// Erro devolvido pela API (ou falha de rede), com mensagem pronta para
+/// exibir.
+class ApiException implements Exception {
+  const ApiException(this.message, {this.code, this.status});
+
+  /// Mensagem em português.
+  final String message;
+
+  /// Código estável do erro (`error.code`), quando veio do servidor.
+  final String? code;
+
+  /// Status HTTP, ou `null` se o servidor não respondeu.
+  final int? status;
+
+  @override
+  String toString() => 'ApiException($status, $code): $message';
+}
+
+/// Cliente da API REST do servidor Beyond TV.
+///
+/// O dashboard é servido pelo próprio servidor, então as chamadas vão para a
+/// mesma origem da página e o cookie de sessão segue automaticamente.
+class ApiClient {
+  ApiClient({http.Client? client, Uri? baseUri})
+      : _client = client ?? http.Client(),
+        _baseUri = baseUri ?? Uri.base;
+
+  final http.Client _client;
+  final Uri _baseUri;
+
+  /// Indica se o administrador já foi criado.
+  Future<bool> isConfigured() async =>
+      (await _send('GET', '/api/v1/setup/status'))['configured'] == true;
+
+  /// Cria o administrador e já abre a sessão. Devolve o nome do usuário.
+  Future<String> setup({
+    required String username,
+    required String password,
+  }) =>
+      _sendCredentials('/api/v1/setup', username, password);
+
+  /// Abre a sessão. Devolve o nome do usuário.
+  Future<String> login({
+    required String username,
+    required String password,
+  }) =>
+      _sendCredentials('/api/v1/auth/login', username, password);
+
+  /// Usuário da sessão atual, ou `null` se não houver sessão.
+  Future<String?> currentUser() async {
+    try {
+      return (await _send('GET', '/api/v1/auth/session'))['username']!
+          as String;
+    } on ApiException catch (e) {
+      if (e.status == 401) return null;
+      rethrow;
+    }
+  }
+
+  Future<void> logout() => _send('POST', '/api/v1/auth/logout');
+
+  Future<String> _sendCredentials(
+    String path,
+    String username,
+    String password,
+  ) async {
+    final body = {'username': username, 'password': password};
+    final json = await _send('POST', path, body: body);
+    return json['username']! as String;
+  }
+
+  Future<Map<String, Object?>> _send(
+    String method,
+    String path, {
+    Map<String, Object?>? body,
+  }) async {
+    final request = http.Request(method, _baseUri.resolve(path));
+    if (body != null) {
+      request.headers['content-type'] = 'application/json';
+      request.body = jsonEncode(body);
+    }
+
+    final http.Response response;
+    try {
+      response = await http.Response.fromStream(await _client.send(request));
+    } on http.ClientException {
+      throw const ApiException(
+        'Não foi possível falar com o servidor. Verifique se ele está '
+        'rodando.',
+      );
+    }
+
+    final json = _decode(response.body);
+    if (response.statusCode >= 400) {
+      final error = json['error'];
+      throw switch (error) {
+        {'code': final String code, 'message': final String message} =>
+          ApiException(message, code: code, status: response.statusCode),
+        _ => ApiException(
+            'Erro inesperado do servidor (${response.statusCode}).',
+            status: response.statusCode,
+          ),
+      };
+    }
+    return json;
+  }
+
+  static Map<String, Object?> _decode(String body) {
+    if (body.isEmpty) return const {};
+    try {
+      final json = jsonDecode(body);
+      return json is Map<String, Object?> ? json : const {};
+    } on FormatException {
+      return const {};
+    }
+  }
+}

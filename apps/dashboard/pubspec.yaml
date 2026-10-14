@@ -11,6 +11,9 @@ dependencies:
   beyond_protocol: any
   flutter:
     sdk: flutter
+  flutter_riverpod: ^3.4.3
+  go_router: ^18.1.0
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:
