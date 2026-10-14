@@ -1,10 +1,19 @@
 import 'package:args/args.dart';
+import 'package:logging/logging.dart';
 
 /// Porta HTTP padrão (dashboard, API, mídia e WebSocket).
 const defaultHttpPort = 8787;
 
 /// Pasta padrão dos dados de execução, relativa ao diretório atual.
 const defaultDataDir = 'data';
+
+/// Níveis de log aceitos em `--log-level`, do mais ao menos detalhado.
+const logLevels = {
+  'debug': Level.FINE,
+  'info': Level.INFO,
+  'warning': Level.WARNING,
+  'error': Level.SEVERE,
+};
 
 /// Erro de configuração inválida, com mensagem pronta para o usuário.
 class ConfigException implements Exception {
@@ -24,6 +33,7 @@ class ServerConfig {
   const ServerConfig({
     this.port = defaultHttpPort,
     this.dataDir = defaultDataDir,
+    this.logLevel = Level.INFO,
   });
 
   /// Lê a configuração de [args] e [environment].
@@ -50,6 +60,7 @@ class ServerConfig {
     return ServerConfig(
       port: _parsePort(option('port', 'BEYOND_PORT')),
       dataDir: option('data-dir', 'BEYOND_DATA_DIR') ?? defaultDataDir,
+      logLevel: _parseLogLevel(option('log-level', 'BEYOND_LOG_LEVEL')),
     );
   }
 
@@ -62,6 +73,9 @@ class ServerConfig {
   /// Pasta onde ficam o banco, as mídias e os logs.
   final String dataDir;
 
+  /// Nível mínimo das mensagens de log.
+  final Level logLevel;
+
   static int _parsePort(String? raw) {
     if (raw == null) return defaultHttpPort;
     final port = int.tryParse(raw);
@@ -71,6 +85,17 @@ class ServerConfig {
       );
     }
     return port;
+  }
+
+  static Level _parseLogLevel(String? raw) {
+    if (raw == null) return Level.INFO;
+    final level = logLevels[raw.toLowerCase()];
+    if (level == null) {
+      throw ConfigException(
+        'Nível de log inválido: "$raw". Use ${logLevels.keys.join(', ')}.',
+      );
+    }
+    return level;
   }
 
   static final _parser = ArgParser()
@@ -87,6 +112,12 @@ class ServerConfig {
           'Pasta de dados (banco, mídias e logs). '
           'Variável de ambiente: BEYOND_DATA_DIR.',
       valueHelp: defaultDataDir,
+    )
+    ..addOption(
+      'log-level',
+      help: 'Nível de log. Variável de ambiente: BEYOND_LOG_LEVEL.',
+      allowed: logLevels.keys,
+      valueHelp: 'info',
     )
     ..addFlag('help', abbr: 'h', negatable: false, help: 'Mostra esta ajuda.');
 }

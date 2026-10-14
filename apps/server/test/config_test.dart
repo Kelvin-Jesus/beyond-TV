@@ -1,4 +1,5 @@
 import 'package:beyond_server/server.dart';
+import 'package:logging/logging.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -48,6 +49,29 @@ void main() {
         );
       });
     }
+
+    test('lê o nível de log de args ou env, sem diferenciar maiúsculas', () {
+      expect(ServerConfig.parse([])!.logLevel, Level.INFO);
+      expect(ServerConfig.parse(['--log-level=debug'])!.logLevel, Level.FINE);
+      expect(
+        ServerConfig.parse(
+          [],
+          environment: {'BEYOND_LOG_LEVEL': 'WARNING'},
+        )!.logLevel,
+        Level.WARNING,
+      );
+    });
+
+    test('recusa nível de log inválido', () {
+      expect(
+        () => ServerConfig.parse(['--log-level=verbose']),
+        throwsA(isA<ConfigException>()),
+      );
+      expect(
+        () => ServerConfig.parse([], environment: {'BEYOND_LOG_LEVEL': 'x'}),
+        throwsA(isA<ConfigException>()),
+      );
+    });
 
     test('recusa opção desconhecida', () {
       expect(

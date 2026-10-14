@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:beyond_server/server.dart';
+import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 
@@ -23,22 +24,28 @@ Future<void> main(List<String> args) async {
     exit(64); // EX_USAGE
   }
 
-  await Directory(config.dataDir).create(recursive: true);
-  final db = openDatabase(p.join(config.dataDir, databaseFileName));
+  setupLogging(config.logLevel, sink: stdout.writeln);
+  final log = Logger('server');
+
+  final dataDir = Directory(config.dataDir).absolute.path;
+  await Directory(dataDir).create(recursive: true);
+  final db = openDatabase(p.join(dataDir, databaseFileName));
 
   final server = await shelf_io.serve(
     buildHandler(),
     InternetAddress.anyIPv4,
     config.port,
   );
-  stdout
-    ..writeln(
-      'Beyond TV $serverVersion ouvindo em http://localhost:${server.port}',
-    )
-    ..writeln('Dados em ${Directory(config.dataDir).absolute.path}');
+  log.info(
+    LogEvent('Beyond TV $serverVersion iniciado', {
+      'url': 'http://localhost:${server.port}',
+      'dataDir': dataDir,
+    }),
+  );
 
   // Encerra de forma limpa com Ctrl+C.
   await ProcessSignal.sigint.watch().first;
+  log.info('encerrando');
   await server.close();
   db.close();
   exit(0);

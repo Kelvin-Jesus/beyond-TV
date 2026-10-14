@@ -10,6 +10,7 @@ environment:
 dependencies:
   args: ^2.7.0
   beyond_protocol: any
+  logging: ^1.3.0
   path: ^1.9.1
   shelf: ^1.4.0
   shelf_router: ^1.1.0
