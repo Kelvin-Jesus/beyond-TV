@@ -3,7 +3,11 @@ import 'dart:io';
 import 'package:beyond_protocol/beyond_protocol.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
+import 'package:sqlite3/sqlite3.dart';
 
+import 'api/setup_api.dart';
+import 'auth/admins.dart';
+import 'auth/passwords.dart';
 import 'http/json.dart';
 import 'http/middleware.dart';
 import 'http/static_site.dart';
@@ -15,7 +19,11 @@ const serverVersion = '0.1.0';
 ///
 /// As rotas da API ficam em `/health`, `/api/` e `/ws/`. O resto é o
 /// dashboard, servido de [webDir] quando a pasta existe.
-Handler buildHandler({String? webDir}) {
+Handler buildHandler({
+  required Database db,
+  String? webDir,
+  PasswordHasher hasher = const PasswordHasher(),
+}) {
   final Handler site = switch (webDir) {
     final dir? when Directory(dir).existsSync() => staticSiteHandler(dir),
     final dir? =>
@@ -30,6 +38,8 @@ Handler buildHandler({String? webDir}) {
         ? throw const ApiException.notFound()
         : site(request),
   )..get('/health', _health);
+
+  SetupApi(admins: AdminStore(db), hasher: hasher).addRoutes(router);
 
   return const Pipeline()
       .addMiddleware(requestLogger())
