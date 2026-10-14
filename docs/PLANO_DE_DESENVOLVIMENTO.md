@@ -304,7 +304,8 @@ erDiagram
 
     ADMIN { int id string username string password_hash }
     SESSION { string id_hash int admin_id datetime expires_at }
-    DEVICE { string id string name string token_hash int group_id string server_id json info datetime last_seen_at datetime created_at }
+    SETTINGS { string key string value }
+    DEVICE { string id string name string token_hash int group_id json info datetime last_seen_at datetime created_at }
     GROUP { int id string name }
     MEDIA { string id string kind string name string url string sha256 int size_bytes string mime }
     PLAYLIST { int id string name }
@@ -312,11 +313,13 @@ erDiagram
     SCHEDULE { int id int playlist_id string target_kind int target_id string days int start_min int end_min int priority }
 ```
 
+- `SETTINGS` guarda pares chave/valor do servidor, como o `server_id`
+  gerado na primeira execução e enviado às TVs no pareamento.
 - `MEDIA.kind` aceita `url`, `image` ou `video`. Um site é uma mídia do tipo
   `url`.
 - Resolução de conteúdo na TV: vale o **agendamento ativo de maior prioridade**.
   Sem nenhum agendamento ativo, vale a **playlist padrão** da TV ou do grupo.
-- Migrações numeradas em `apps/server/lib/src/db/migrations/0001_init.dart` e
+- Migrações numeradas em `apps/server/lib/src/db/migrations/m0001_init.dart` e
   seguintes, com o SQL embutido no código para o executável compilado não
   depender de arquivos externos. Elas são aplicadas automaticamente na
   inicialização, cada uma numa transação, e a versão fica em
