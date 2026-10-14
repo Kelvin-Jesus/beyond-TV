@@ -496,14 +496,14 @@ segurança e GitHub configurado (secret scanning, proteção de branch).
 dashboard abrir no Chrome, o APK de debug instalar no emulador TV e o CI estiver
 verde.
 
-### Fase 2 — Núcleo do servidor ⬜
-| # | Commit |
-|---|--------|
-| 2.1 | `feat(server): adiciona configuração por args/env (porta, pasta de dados)` |
-| 2.2 | `feat(server): adiciona SQLite com sistema de migrações` |
-| 2.3 | `feat(server): adiciona migração inicial (admin, sessões, devices, grupos)` |
-| 2.4 | `feat(server): adiciona logging estruturado e tratamento de erros` |
-| 2.5 | `feat(server): serve build estático do dashboard` |
+### Fase 2 — Núcleo do servidor ✅
+| # | Commit | Status |
+|---|--------|--------|
+| 2.1 | `feat(server): adiciona configuração por args/env (porta, pasta de dados)` | ✅ |
+| 2.2 | `feat(server): adiciona SQLite com sistema de migrações` | ✅ |
+| 2.3 | `feat(server): adiciona migração inicial (admin, sessões, devices, grupos)` | ✅ |
+| 2.4 | `feat(server): adiciona logging estruturado e tratamento de erros` | ✅ |
+| 2.5 | `feat(server): serve build estático do dashboard` | ✅ |
 
 ### Fase 3 — Autenticação do administrador ⬜
 | # | Commit |

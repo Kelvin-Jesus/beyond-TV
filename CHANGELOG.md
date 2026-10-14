@@ -7,6 +7,23 @@ o projeto usa [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.2.0] — Fase 2: núcleo do servidor
+
+### Adicionado
+
+- Configuração do servidor por argumentos ou variáveis de ambiente: porta,
+  pasta de dados, pasta do dashboard e nível de log (veja o `.env.example`).
+- Banco SQLite em `data/beyond.db` com migrações versionadas e aplicadas na
+  inicialização.
+- Esquema inicial: configurações do servidor, administrador, sessões, grupos
+  e TVs.
+- Logs estruturados (logfmt) e erros da API padronizados em JSON.
+- O servidor serve o dashboard compilado em `http://localhost:8787/`.
+
+### Alterado
+
+- O servidor passa a exigir Dart ≥ 3.10.
+
 ## [0.1.0] — Fase 1: esqueleto do monorepo
 
 ### Adicionado
