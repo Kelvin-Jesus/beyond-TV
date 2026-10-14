@@ -516,19 +516,19 @@ verde.
 | 3.4 | `feat(dashboard): adiciona telas de setup inicial e login` | ✅ |
 | 3.5 | `test(server): cobre fluxos de setup, login e sessão expirada` | ✅ |
 
-### Fase 4 — Pareamento ⬜
-| # | Commit |
-|---|--------|
-| 4.1 | `feat(protocol): adiciona modelos de pareamento e DeviceInfo` |
-| 4.2 | `feat(server): gera códigos de pareamento com expiração e uso único` |
-| 4.3 | `feat(server): adiciona endpoint /pair com emissão de token` |
-| 4.4 | `feat(server): responde descoberta via UDP broadcast` |
-| 4.5 | `feat(tv): adiciona descoberta de servidor e entrada de IP manual` |
-| 4.6 | `feat(tv): adiciona tela de pareamento com teclado para D-pad` |
-| 4.7 | `feat(tv): armazena token no secure storage` |
-| 4.8 | `feat(dashboard): adiciona fluxo "Adicionar TV" com código e contador` |
-| 4.9 | `test(server): cobre código expirado, reutilizado e rate limit` |
-| 4.10 | `docs: documenta fluxo de pareamento em protocolo.md` |
+### Fase 4 — Pareamento ✅
+| # | Commit | Status |
+|---|--------|--------|
+| 4.1 | `feat(protocol): adiciona modelos de pareamento e DeviceInfo` | ✅ |
+| 4.2 | `feat(server): gera códigos de pareamento com expiração e uso único` | ✅ |
+| 4.3 | `feat(server): adiciona endpoint /pair com emissão de token` | ✅ |
+| 4.4 | `feat(server): responde descoberta via UDP broadcast` | ✅ |
+| 4.5 | `feat(tv): adiciona descoberta de servidor e entrada de IP manual` | ✅ |
+| 4.6 | `feat(tv): adiciona tela de pareamento com teclado para D-pad` | ✅ |
+| 4.7 | `feat(tv): armazena token no secure storage` | ✅ |
+| 4.8 | `feat(dashboard): adiciona fluxo "Adicionar TV" com código e contador` | ✅ |
+| 4.9 | `test(server): cobre código expirado, reutilizado e rate limit` | ✅ |
+| 4.10 | `docs: documenta fluxo de pareamento em protocolo.md` | ✅ |
 
 **Marco:** a TV aparece no dashboard depois de digitar o código. 🎉
 
