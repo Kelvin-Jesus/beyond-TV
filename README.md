@@ -43,6 +43,10 @@ flutter pub get        # na raiz: resolve todo o workspace de uma vez
 | Análise | `flutter analyze` (na raiz) | Analisa todos os pacotes |
 | Testes | `dart test` ou `flutter test` dentro de cada pacote | |
 
+O servidor aceita `--port` e `--data-dir` (ou as variáveis `BEYOND_PORT` e
+`BEYOND_DATA_DIR`, veja o [.env.example](.env.example)). Use
+`dart run apps/server/bin/server.dart --help` para ver todas as opções.
+
 ### Problemas conhecidos no Windows
 
 - **Caminho com acento ou espaço** (ex.: `Área de Trabalho`): o `dart test`

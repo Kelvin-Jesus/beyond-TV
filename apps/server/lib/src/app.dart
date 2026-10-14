@@ -7,9 +7,6 @@ import 'package:shelf_router/shelf_router.dart';
 /// Versão do servidor exposta em `/health`.
 const serverVersion = '0.1.0';
 
-/// Porta HTTP padrão (dashboard, API, mídia e WebSocket).
-const defaultHttpPort = 8787;
-
 /// Monta o handler HTTP completo do servidor.
 Handler buildHandler() {
   final router = Router()..get('/health', _health);
