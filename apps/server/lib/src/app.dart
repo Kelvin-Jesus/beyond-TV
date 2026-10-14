@@ -15,13 +15,13 @@ Handler buildHandler() {
 }
 
 Response _health(Request request) => _json({
-      'status': 'ok',
-      'version': serverVersion,
-      'protocol': protocolVersion,
-    });
+  'status': 'ok',
+  'version': serverVersion,
+  'protocol': protocolVersion,
+});
 
 Response _json(Object body, {int status = 200}) => Response(
-      status,
-      body: jsonEncode(body),
-      headers: {'content-type': 'application/json; charset=utf-8'},
-    );
+  status,
+  body: jsonEncode(body),
+  headers: {'content-type': 'application/json; charset=utf-8'},
+);

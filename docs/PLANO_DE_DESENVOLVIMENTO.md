@@ -316,8 +316,11 @@ erDiagram
   `url`.
 - Resolução de conteúdo na TV: vale o **agendamento ativo de maior prioridade**.
   Sem nenhum agendamento ativo, vale a **playlist padrão** da TV ou do grupo.
-- Migrações numeradas em `apps/server/lib/src/db/migrations/0001_init.sql` e
-  seguintes, aplicadas automaticamente na inicialização.
+- Migrações numeradas em `apps/server/lib/src/db/migrations/0001_init.dart` e
+  seguintes, com o SQL embutido no código para o executável compilado não
+  depender de arquivos externos. Elas são aplicadas automaticamente na
+  inicialização, cada uma numa transação, e a versão fica em
+  `PRAGMA user_version`. Uma migração publicada nunca é editada.
 
 ---
 

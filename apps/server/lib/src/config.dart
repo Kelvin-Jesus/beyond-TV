@@ -83,7 +83,8 @@ class ServerConfig {
     ..addOption(
       'data-dir',
       abbr: 'd',
-      help: 'Pasta de dados (banco, mídias e logs). '
+      help:
+          'Pasta de dados (banco, mídias e logs). '
           'Variável de ambiente: BEYOND_DATA_DIR.',
       valueHelp: defaultDataDir,
     )

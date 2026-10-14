@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:beyond_server/server.dart';
+import 'package:path/path.dart' as p;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 
 Future<void> main(List<String> args) async {
@@ -23,6 +24,7 @@ Future<void> main(List<String> args) async {
   }
 
   await Directory(config.dataDir).create(recursive: true);
+  final db = openDatabase(p.join(config.dataDir, databaseFileName));
 
   final server = await shelf_io.serve(
     buildHandler(),
@@ -38,5 +40,6 @@ Future<void> main(List<String> args) async {
   // Encerra de forma limpa com Ctrl+C.
   await ProcessSignal.sigint.watch().first;
   await server.close();
+  db.close();
   exit(0);
 }

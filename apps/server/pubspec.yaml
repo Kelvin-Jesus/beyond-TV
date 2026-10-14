@@ -5,13 +5,15 @@ publish_to: none
 resolution: workspace
 
 environment:
-  sdk: ^3.6.0
+  sdk: ^3.10.0 # sqlite3 3.x usa build hooks
 
 dependencies:
   args: ^2.7.0
   beyond_protocol: any
+  path: ^1.9.1
   shelf: ^1.4.0
   shelf_router: ^1.1.0
+  sqlite3: ^3.7.1
 
 dev_dependencies:
   http: ^1.2.0
