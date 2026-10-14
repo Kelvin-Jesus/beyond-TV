@@ -216,7 +216,7 @@ sequenceDiagram
     D-->>Admin: Exibe código + contagem regressiva (10 min)
 
     T->>S: UDP broadcast "BEYONDTV_DISCOVER v1"
-    S-->>T: { name, host, port, serverId }
+    S-->>T: { v, name, port, serverId } (o IP é a origem do pacote)
     T-->>Admin: Lista servidores encontrados (ou IP manual)
 
     Admin->>T: Digita K7M4QX no teclado on-screen

@@ -15,6 +15,7 @@ export 'src/db/database.dart';
 export 'src/db/migrations/migrations.dart';
 export 'src/db/migrator.dart';
 export 'src/devices/devices.dart';
+export 'src/discovery/discovery_responder.dart';
 export 'src/http/json.dart';
 export 'src/http/middleware.dart';
 export 'src/http/rate_limit.dart';

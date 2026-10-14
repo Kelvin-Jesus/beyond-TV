@@ -48,10 +48,11 @@ O dashboard chama a API na mesma origem em que foi aberto, e o servidor recusa
 requisições de outra origem (proteção contra CSRF). Para testar login e as
 telas que usam dados, compile com `flutter build web` e abra pelo servidor.
 
-O servidor aceita `--port`, `--data-dir`, `--web-dir` e `--log-level` (ou as
-variáveis `BEYOND_PORT`, `BEYOND_DATA_DIR`, `BEYOND_WEB_DIR` e
-`BEYOND_LOG_LEVEL`, veja o [.env.example](.env.example)). Os caminhos
-padrão consideram que o servidor roda a partir da raiz do repositório. Use
+O servidor aceita `--port`, `--discovery-port`, `--data-dir`, `--web-dir` e
+`--log-level` (ou as variáveis `BEYOND_PORT`, `BEYOND_DISCOVERY_PORT`,
+`BEYOND_DATA_DIR`, `BEYOND_WEB_DIR` e `BEYOND_LOG_LEVEL`, veja o
+[.env.example](.env.example)). Os caminhos padrão consideram que o servidor
+roda a partir da raiz do repositório. Use
 `dart run apps/server/bin/server.dart --help` para ver todas as opções.
 
 ### Problemas conhecidos no Windows
