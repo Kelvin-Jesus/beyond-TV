@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:beyond_protocol/beyond_protocol.dart';
 import 'package:http/http.dart' as http;
 
+import 'media.dart';
+
 /// Erro devolvido pela API (ou falha de rede), com mensagem pronta para
 /// exibir.
 class ApiException implements Exception {
@@ -97,6 +99,45 @@ class ApiClient {
   /// Remove a TV [id] (o servidor responde 204, sem corpo).
   Future<void> removeDevice(String id) =>
       _send('DELETE', '/api/v1/devices/$id');
+
+  /// Sites salvos na biblioteca, do mais novo para o mais antigo.
+  Future<List<Media>> listMedia() async {
+    final json = await _send('GET', '/api/v1/media');
+    final media = json['media'];
+    if (media is! List) return const [];
+    return [
+      for (final item in media)
+        if (item is Map<String, Object?>) Media.fromJson(item),
+    ];
+  }
+
+  /// Manda a TV [id] exibir o site [url], com [name] opcional.
+  Future<DeviceSummary> setDeviceContentUrl(
+    String id,
+    String url, {
+    String? name,
+  }) async =>
+      DeviceSummary.fromJson(
+        await _send(
+          'PUT',
+          '/api/v1/devices/$id/content',
+          body: {'url': url, if (name != null) 'name': name},
+        ),
+      );
+
+  /// Manda a TV [id] exibir a mídia [mediaId]; `null` limpa o conteúdo.
+  Future<DeviceSummary> setDeviceMedia(String id, String? mediaId) async =>
+      DeviceSummary.fromJson(
+        await _send(
+          'PUT',
+          '/api/v1/devices/$id/content',
+          body: {'mediaId': mediaId},
+        ),
+      );
+
+  /// Envia um dos `DeviceCommands` para a TV [id] (o servidor responde 202).
+  Future<void> sendCommand(String id, String type) =>
+      _send('POST', '/api/v1/devices/$id/commands', body: {'type': type});
 
   Future<String> _sendCredentials(
     String path,
