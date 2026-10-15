@@ -100,4 +100,12 @@ class DevicesController extends AsyncNotifier<List<DeviceSummary>> {
         if (d.id != id) d,
     ]);
   }
+
+  /// Troca a TV pela versão devolvida pela API (ex.: após mudar o conteúdo).
+  void replace(DeviceSummary device) {
+    state = AsyncData([
+      for (final d in _current ?? const <DeviceSummary>[])
+        d.id == device.id ? device : d,
+    ]);
+  }
 }

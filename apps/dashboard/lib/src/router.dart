@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'auth/auth_controller.dart';
+import 'devices/device_detail_page.dart';
 import 'pages/home_page.dart';
 import 'pages/login_page.dart';
 import 'pages/setup_page.dart';
@@ -14,6 +15,9 @@ abstract final class Routes {
   static const setup = '/configuracao';
   static const login = '/login';
   static const home = '/';
+
+  /// Detalhes da TV [id].
+  static String device(String id) => '/tvs/$id';
 }
 
 /// Roteador que leva cada estado de autenticação para a tela certa.
@@ -48,6 +52,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.home,
         builder: (context, state) => const HomePage(),
+      ),
+      GoRoute(
+        path: '/tvs/:id',
+        builder: (context, state) =>
+            DeviceDetailPage(id: state.pathParameters['id']!),
       ),
     ],
   );
