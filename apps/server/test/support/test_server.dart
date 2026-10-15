@@ -52,6 +52,22 @@ class TestServer {
     body: json == null ? null : jsonEncode(json),
   );
 
+  /// Requisição com [method] arbitrário (`PATCH`, `DELETE`...).
+  Future<http.Response> send(
+    String method,
+    String path, {
+    Object? json,
+    Map<String, String>? headers,
+  }) async {
+    final request = http.Request(method, uri(path))
+      ..headers.addAll({
+        if (json != null) 'content-type': 'application/json',
+        ...?headers,
+      });
+    if (json != null) request.body = jsonEncode(json);
+    return http.Response.fromStream(await request.send());
+  }
+
   Future<void> close() async {
     await _server.close(force: true);
     db.close();

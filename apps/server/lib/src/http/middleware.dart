@@ -45,7 +45,7 @@ Middleware originCheck() =>
       final origin = request.headers['origin'];
       if (origin != null &&
           !_safeMethods.contains(request.method) &&
-          !_isSameOrigin(origin, request)) {
+          !isSameOrigin(origin, request)) {
         throw const ApiException(
           403,
           'forbidden_origin',
@@ -57,7 +57,8 @@ Middleware originCheck() =>
 
 const _safeMethods = {'GET', 'HEAD', 'OPTIONS'};
 
-bool _isSameOrigin(String origin, Request request) {
+/// Indica se o cabeçalho `Origin` [origin] aponta para o próprio servidor.
+bool isSameOrigin(String origin, Request request) {
   final host = request.headers['host'];
   final scheme = request.requestedUri.scheme;
   final originUri = Uri.tryParse(origin);

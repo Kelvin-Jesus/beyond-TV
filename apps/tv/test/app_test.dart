@@ -1,8 +1,12 @@
+import 'package:beyond_protocol/beyond_protocol.dart';
 import 'package:beyond_tv/src/app.dart';
+import 'package:beyond_tv/src/device/credentials.dart';
+import 'package:beyond_tv/src/realtime/backoff.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/fake_socket.dart';
 import 'support/fakes.dart';
 
 void main() {
@@ -100,6 +104,61 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Servidor inacessível'), findsOneWidget);
+    });
+  });
+
+  group('TV pareada', () {
+    const saved = Credentials(
+      deviceId: 'tv-1',
+      deviceToken: 'segredo',
+      server: pcSala,
+    );
+
+    TvApp app(FakeConnector connector, MemoryCredentialStore store) => TvApp(
+          credentials: store,
+          discovery: FakeDiscovery(),
+          api: fakeApi(),
+          connector: connector.call,
+          backoffFactory: () => Backoff(initial: const Duration(hours: 1)),
+        );
+
+    testWidgets('mostra "Conectada" quando o servidor aceita', (tester) async {
+      useTvScreen(tester);
+      final connector = FakeConnector();
+      await tester.pumpWidget(app(connector, MemoryCredentialStore(saved)));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Conectada'), findsOneWidget);
+      expect(connector.headers.single['authorization'], 'Bearer segredo');
+
+      // Troca a tela para o dispose cancelar os timers.
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('4401 volta para a escolha do servidor', (tester) async {
+      useTvScreen(tester);
+      final connector = FakeConnector();
+      final store = MemoryCredentialStore(saved);
+      await tester.pumpWidget(app(connector, store));
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('Conectada'), findsOneWidget);
+
+      connector.last.serverClose(WsCloseCodes.unauthorized);
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.text('Escolha o servidor'), findsOneWidget);
+      expect(
+        find.text('Esta TV foi removida do painel. Pareie de novo.'),
+        findsOneWidget,
+      );
+      expect(store.saved, isNull);
+
+      await tester.pumpWidget(const SizedBox());
     });
   });
 }

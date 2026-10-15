@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 
+import '../support/fake_socket.dart';
 import '../support/fakes.dart';
 
 void main() {
@@ -51,6 +52,7 @@ void main() {
         credentials: store,
         discovery: FakeDiscovery([pcSala]),
         deviceInfo: const FakeDeviceInfo(),
+        connector: FakeConnector().call,
         api: fakeApi(
           onlineHosts: onlineHosts,
           routes: {'POST /api/v1/pair': pairWith(response ?? paired)},
@@ -121,6 +123,7 @@ void main() {
     expect(saved.deviceToken, 'token');
     expect(saved.server.serverId, 'abc');
     expect(saved.server.hostPort, '192.168.0.10:8787');
+    await tester.pumpWidget(const SizedBox());
   });
 
   testWidgets('ignora teclas fora do alfabeto e apaga com Backspace', (

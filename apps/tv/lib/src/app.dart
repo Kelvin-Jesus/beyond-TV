@@ -5,6 +5,9 @@ import 'device/device_info_source.dart';
 import 'pages/paired_page.dart';
 import 'pages/pairing_page.dart';
 import 'pages/server_select_page.dart';
+import 'realtime/backoff.dart';
+import 'realtime/device_connection.dart';
+import 'realtime/socket_connector.dart';
 import 'server/discovery.dart';
 import 'server/server_address.dart';
 import 'server/tv_api.dart';
@@ -17,15 +20,22 @@ class TvApp extends StatelessWidget {
     TvApi? api,
     DeviceInfoSource? deviceInfo,
     CredentialStore? credentials,
+    SocketConnector? connector,
+    this.backoffFactory,
   })  : discovery = discovery ?? const UdpServerDiscovery(),
         api = api ?? TvApi(),
         deviceInfo = deviceInfo ?? const PlatformDeviceInfoSource(),
-        credentials = credentials ?? const SecureCredentialStore();
+        credentials = credentials ?? const SecureCredentialStore(),
+        connector = connector ?? ioConnector;
 
   final ServerDiscovery discovery;
   final TvApi api;
   final DeviceInfoSource deviceInfo;
   final CredentialStore credentials;
+  final SocketConnector connector;
+
+  /// Cria o backoff de cada conexão; os testes usam esperas curtas.
+  final Backoff Function()? backoffFactory;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +55,35 @@ class TvApp extends StatelessWidget {
         ),
       );
 
+  Widget _paired(Credentials saved) => PairedPage(
+        connection: DeviceConnection(
+          credentials: saved,
+          deviceInfo: deviceInfo,
+          store: credentials,
+          discovery: discovery,
+          connector: connector,
+          backoff: backoffFactory?.call(),
+        ),
+        onUnauthorized: _backToPairing,
+      );
+
+  /// A TV foi removida no painel: volta à seleção de servidor.
+  void _backToPairing(BuildContext context) {
+    final messenger = ScaffoldMessenger.of(context);
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute<void>(builder: (_) => _serverSelect()),
+      (_) => false,
+    );
+    messenger.showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Esta TV foi removida do painel. Pareie de novo.',
+          style: TextStyle(fontSize: 24),
+        ),
+      ),
+    );
+  }
+
   void _openPairing(BuildContext context, ServerAddress server) {
     final navigator = Navigator.of(context);
     navigator.push(
@@ -59,7 +98,7 @@ class TvApp extends StatelessWidget {
             await credentials.save(saved);
             navigator.pushAndRemoveUntil(
               MaterialPageRoute<void>(
-                builder: (_) => PairedPage(server: saved.server),
+                builder: (_) => _paired(saved),
               ),
               (_) => false,
             );
@@ -83,6 +122,9 @@ class _StartupPage extends StatefulWidget {
 class _StartupPageState extends State<_StartupPage> {
   late final Future<Credentials?> _saved = _load();
 
+  /// Guardada para um rebuild não abrir outra conexão.
+  Widget? _page;
+
   Future<Credentials?> _load() async {
     try {
       return await widget.app.credentials.load();
@@ -105,7 +147,7 @@ class _StartupPageState extends State<_StartupPage> {
           );
         }
         return switch (snapshot.data) {
-          final saved? => PairedPage(server: saved.server),
+          final saved? => _page ??= widget.app._paired(saved),
           null => widget.app._serverSelect(),
         };
       },

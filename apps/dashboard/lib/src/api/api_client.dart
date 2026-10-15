@@ -33,6 +33,9 @@ class ApiClient {
   final http.Client _client;
   final Uri _baseUri;
 
+  /// Origem do servidor (a da página do dashboard).
+  Uri get baseUri => _baseUri;
+
   /// Indica se o administrador já foi criado.
   Future<bool> isConfigured() async =>
       (await _send('GET', '/api/v1/setup/status'))['configured'] == true;
@@ -73,6 +76,27 @@ class ApiClient {
       PairingStatus.fromJson(
         await _send('GET', '/api/v1/pairing-codes/$code'),
       );
+
+  /// TVs pareadas, da mais nova para a mais antiga.
+  Future<List<DeviceSummary>> listDevices() async {
+    final json = await _send('GET', '/api/v1/devices');
+    final devices = json['devices'];
+    if (devices is! List) return const [];
+    return [
+      for (final device in devices)
+        if (device is Map<String, Object?>) DeviceSummary.fromJson(device),
+    ];
+  }
+
+  /// Renomeia a TV [id]. Devolve a TV atualizada.
+  Future<DeviceSummary> renameDevice(String id, String name) async =>
+      DeviceSummary.fromJson(
+        await _send('PATCH', '/api/v1/devices/$id', body: {'name': name}),
+      );
+
+  /// Remove a TV [id] (o servidor responde 204, sem corpo).
+  Future<void> removeDevice(String id) =>
+      _send('DELETE', '/api/v1/devices/$id');
 
   Future<String> _sendCredentials(
     String path,

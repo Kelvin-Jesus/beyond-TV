@@ -10,6 +10,7 @@ import '../http/json.dart';
 import '../http/rate_limit.dart';
 import '../logging.dart';
 import '../pairing/pairing_codes.dart';
+import '../realtime/device_hub.dart';
 
 final _log = Logger('pairing');
 
@@ -25,10 +26,12 @@ class PairingApi {
     required SessionStore sessions,
     required PairingCodeStore codes,
     required DeviceStore devices,
+    required DeviceHub hub,
     RateLimiter? pairLimiter,
   }) : _sessions = sessions,
        _codes = codes,
        _devices = devices,
+       _hub = hub,
        _pairLimiter =
            pairLimiter ??
            RateLimiter(
@@ -41,6 +44,7 @@ class PairingApi {
   final SessionStore _sessions;
   final PairingCodeStore _codes;
   final DeviceStore _devices;
+  final DeviceHub _hub;
   final RateLimiter _pairLimiter;
 
   void addRoutes(Router router) {
@@ -106,6 +110,10 @@ class PairingApi {
       info: pair.deviceInfo,
     );
     _pairLimiter.reset(ip);
+    final row = _devices.find(deviceId);
+    if (row != null) {
+      _hub.publish(MessageTypes.devicePaired, _hub.summaryOf(row).toJson());
+    }
     _log.info(
       LogEvent('TV pareada', {'deviceId': deviceId, 'name': name, 'ip': ip}),
     );

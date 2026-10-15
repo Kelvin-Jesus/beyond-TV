@@ -6,6 +6,7 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 import 'api/auth_api.dart';
+import 'api/devices_api.dart';
 import 'api/pairing_api.dart';
 import 'api/setup_api.dart';
 import 'auth/admins.dart';
@@ -18,6 +19,9 @@ import 'http/middleware.dart';
 import 'http/rate_limit.dart';
 import 'http/static_site.dart';
 import 'pairing/pairing_codes.dart';
+import 'realtime/admin_socket.dart';
+import 'realtime/device_hub.dart';
+import 'realtime/device_socket.dart';
 
 /// Versão do servidor exposta em `/health`.
 const serverVersion = '0.1.0';
@@ -31,6 +35,7 @@ Handler buildHandler({
   String? webDir,
   PasswordHasher hasher = const PasswordHasher(),
   Clock clock = DateTime.now,
+  RealtimeTimeouts timeouts = const RealtimeTimeouts(),
 }) {
   final Handler site = switch (webDir) {
     final dir? when Directory(dir).existsSync() => staticSiteHandler(dir),
@@ -64,16 +69,26 @@ Handler buildHandler({
       clock: clock,
     ),
   ).addRoutes(router);
+  final devices = DeviceStore(db, clock: clock);
+  final hub = DeviceHub(devices: devices, clock: clock);
   PairingApi(
     sessions: sessions,
     codes: PairingCodeStore(clock: clock),
-    devices: DeviceStore(db),
+    devices: devices,
+    hub: hub,
     pairLimiter: RateLimiter(
       maxAttempts: PairingApi.maxPairAttempts,
       window: const Duration(minutes: 1),
       clock: clock,
     ),
   ).addRoutes(router);
+  DevicesApi(sessions: sessions, devices: devices, hub: hub).addRoutes(router);
+  router
+    ..get(
+      WsPaths.device,
+      DeviceSocket(devices: devices, hub: hub, timeouts: timeouts).handle,
+    )
+    ..get(WsPaths.admin, AdminSocket(sessions: sessions, hub: hub).handle);
 
   return const Pipeline()
       .addMiddleware(requestLogger())
