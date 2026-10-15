@@ -82,6 +82,19 @@ void main() {
     expect(db.userVersion, 0);
   });
 
+  test('migração 2 preserva TVs existentes com media_id nulo', () {
+    migrate(db, migrations.take(1).toList());
+    db.execute(
+      "INSERT INTO devices (id, name, token_hash) VALUES ('tv1', 'TV', 'h')",
+    );
+
+    expect(migrate(db, migrations), [2]);
+
+    final row = db.select('SELECT name, media_id FROM devices').single;
+    expect(row['name'], 'TV');
+    expect(row['media_id'], isNull);
+  });
+
   group('openDatabase', () {
     late Directory dir;
 

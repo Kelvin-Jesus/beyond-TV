@@ -9,6 +9,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import '../auth/tokens.dart';
 import '../devices/devices.dart';
 import '../logging.dart';
+import 'content_sync.dart';
 import 'device_hub.dart';
 
 final _log = Logger('realtime.device');
@@ -32,13 +33,16 @@ class DeviceSocket {
   DeviceSocket({
     required DeviceStore devices,
     required DeviceHub hub,
+    required ContentSync sync,
     RealtimeTimeouts timeouts = const RealtimeTimeouts(),
   }) : _devices = devices,
        _hub = hub,
+       _sync = sync,
        _timeouts = timeouts;
 
   final DeviceStore _devices;
   final DeviceHub _hub;
+  final ContentSync _sync;
   final RealtimeTimeouts _timeouts;
 
   /// Handler da rota; autentica pelo cabeçalho antes do upgrade.
@@ -149,10 +153,20 @@ class DeviceSocket {
               _hub.summaryOf(row).toJson(),
             );
           }
+          _sync.syncDevice(device.id);
           _log.info(LogEvent('TV online', {'deviceId': device.id}));
         } else if (envelope.type == MessageTypes.heartbeat) {
           final beat = HeartbeatPayload.fromJson(envelope.payload);
           _hub.markSeen(device.id, currentItem: beat.currentItem);
+        } else if (envelope.type == MessageTypes.ack) {
+          try {
+            final ack = AckPayload.fromJson(envelope.payload);
+            _log.fine(LogEvent('ack', {'deviceId': device.id, 'ref': ack.ref}));
+          } on ProtocolException {
+            _log.fine(
+              LogEvent('ack inválido ignorado', {'deviceId': device.id}),
+            );
+          }
         } else {
           _log.fine(
             LogEvent('mensagem ignorada', {
