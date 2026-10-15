@@ -263,6 +263,7 @@ A especificação completa fica em `docs/protocolo.md`. O resumo vem abaixo.
 | GET | `/setup/status` | — | Indica se a configuração inicial já foi feita. |
 | POST | `/setup` | — (só na 1ª vez) | Cria o administrador. |
 | POST | `/auth/login` · `/auth/logout` | — / sessão | Login e logout com cookie de sessão. |
+| GET | `/auth/session` | admin | Usuário da sessão atual (`401` se não houver). |
 | POST | `/pairing-codes` | admin | Gera um código. |
 | POST | `/pair` | código | A TV troca o código por um token. |
 | GET/PATCH/DELETE | `/devices[/:id]` | admin | Lista, renomeia ou remove uma TV. |
@@ -505,14 +506,14 @@ verde.
 | 2.4 | `feat(server): adiciona logging estruturado e tratamento de erros` | ✅ |
 | 2.5 | `feat(server): serve build estático do dashboard` | ✅ |
 
-### Fase 3 — Autenticação do administrador ⬜
-| # | Commit |
-|---|--------|
-| 3.1 | `feat(server): adiciona setup inicial e criação de admin com bcrypt` |
-| 3.2 | `feat(server): adiciona login/logout com sessão em cookie seguro` |
-| 3.3 | `feat(server): adiciona rate limit e checagem de Origin` |
-| 3.4 | `feat(dashboard): adiciona telas de setup inicial e login` |
-| 3.5 | `test(server): cobre fluxos de setup, login e sessão expirada` |
+### Fase 3 — Autenticação do administrador ✅
+| # | Commit | Status |
+|---|--------|--------|
+| 3.1 | `feat(server): adiciona setup inicial e criação de admin com bcrypt` | ✅ |
+| 3.2 | `feat(server): adiciona login/logout com sessão em cookie seguro` | ✅ |
+| 3.3 | `feat(server): adiciona rate limit e checagem de Origin` | ✅ |
+| 3.4 | `feat(dashboard): adiciona telas de setup inicial e login` | ✅ |
+| 3.5 | `test(server): cobre fluxos de setup, login e sessão expirada` | ✅ |
 
 ### Fase 4 — Pareamento ⬜
 | # | Commit |

@@ -7,6 +7,19 @@ o projeto usa [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.3.0] — Fase 3: autenticação do administrador
+
+### Adicionado
+
+- Configuração inicial: quem abre o painel pela primeira vez cria o
+  administrador. Não existe senha padrão; a senha é guardada com bcrypt.
+- Login e logout com sessão em cookie `HttpOnly` e `SameSite=Strict`, válida
+  por 7 dias. O banco guarda só o hash do token.
+- Limite de 5 logins errados por minuto por IP (resposta `429`).
+- Requisições que alteram dados vindas de outra origem são recusadas
+  (proteção contra CSRF).
+- Dashboard com telas de configuração inicial, login e painel provisório.
+
 ## [0.2.0] — Fase 2: núcleo do servidor
 
 ### Adicionado

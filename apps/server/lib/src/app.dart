@@ -3,7 +3,15 @@ import 'dart:io';
 import 'package:beyond_protocol/beyond_protocol.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
+import 'package:sqlite3/sqlite3.dart';
 
+import 'api/auth_api.dart';
+import 'api/setup_api.dart';
+import 'auth/admins.dart';
+import 'auth/passwords.dart';
+import 'auth/sessions.dart';
+import 'clock.dart';
+import 'http/rate_limit.dart';
 import 'http/json.dart';
 import 'http/middleware.dart';
 import 'http/static_site.dart';
@@ -15,7 +23,12 @@ const serverVersion = '0.1.0';
 ///
 /// As rotas da API ficam em `/health`, `/api/` e `/ws/`. O resto é o
 /// dashboard, servido de [webDir] quando a pasta existe.
-Handler buildHandler({String? webDir}) {
+Handler buildHandler({
+  required Database db,
+  String? webDir,
+  PasswordHasher hasher = const PasswordHasher(),
+  Clock clock = DateTime.now,
+}) {
   final Handler site = switch (webDir) {
     final dir? when Directory(dir).existsSync() => staticSiteHandler(dir),
     final dir? =>
@@ -31,9 +44,28 @@ Handler buildHandler({String? webDir}) {
         : site(request),
   )..get('/health', _health);
 
+  final admins = AdminStore(db);
+  final sessions = SessionStore(db, clock: clock);
+  SetupApi(
+    admins: admins,
+    sessions: sessions,
+    hasher: hasher,
+  ).addRoutes(router);
+  AuthApi(
+    admins: admins,
+    sessions: sessions,
+    hasher: hasher,
+    loginLimiter: RateLimiter(
+      maxAttempts: AuthApi.maxFailedLogins,
+      window: const Duration(minutes: 1),
+      clock: clock,
+    ),
+  ).addRoutes(router);
+
   return const Pipeline()
       .addMiddleware(requestLogger())
       .addMiddleware(errorHandler())
+      .addMiddleware(originCheck())
       .addHandler(router.call);
 }
 
