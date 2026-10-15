@@ -65,7 +65,7 @@ class DeviceStore {
   /// Todas as TVs, da mais nova para a mais antiga.
   List<DeviceRow> list() => [
     for (final row in _db.select(
-      'SELECT id, name, group_id, info, last_seen_at, created_at '
+      'SELECT id, name, group_id, info, last_seen_at, created_at, media_id '
       'FROM devices ORDER BY created_at DESC, id',
     ))
       _toRow(row),
@@ -74,7 +74,7 @@ class DeviceStore {
   /// A TV [id], ou `null` se não existe.
   DeviceRow? find(String id) {
     final rows = _db.select(
-      'SELECT id, name, group_id, info, last_seen_at, created_at '
+      'SELECT id, name, group_id, info, last_seen_at, created_at, media_id '
       'FROM devices WHERE id = ?',
       [id],
     );
@@ -86,6 +86,25 @@ class DeviceStore {
     _db.execute('UPDATE devices SET name = ? WHERE id = ?', [name, id]);
     return _db.updatedRows > 0;
   }
+
+  /// Define a mídia exibida pela TV [deviceId] (`null` limpa).
+  /// Devolve `false` se a TV não existe.
+  bool setMedia(String deviceId, String? mediaId) {
+    _db.execute('UPDATE devices SET media_id = ? WHERE id = ?', [
+      mediaId,
+      deviceId,
+    ]);
+    return _db.updatedRows > 0;
+  }
+
+  /// Ids das TVs que exibem a mídia [mediaId].
+  List<String> devicesShowing(String mediaId) => [
+    for (final row in _db.select(
+      'SELECT id FROM devices WHERE media_id = ? ORDER BY id',
+      [mediaId],
+    ))
+      row['id'] as String,
+  ];
 
   /// Apaga a TV [id] (e, com ela, o hash do token). `false` se não existe.
   bool delete(String id) {
@@ -103,6 +122,7 @@ class DeviceStore {
       info: info.isEmpty ? null : DeviceInfo.fromJson(info),
       lastSeenAt: lastSeen == null ? null : DateTime.parse(lastSeen).toUtc(),
       createdAt: DateTime.parse(row['created_at'] as String).toUtc(),
+      mediaId: row['media_id'] as String?,
     );
   }
 }
@@ -116,6 +136,7 @@ class DeviceRow {
     this.groupId,
     this.info,
     this.lastSeenAt,
+    this.mediaId,
   });
 
   final String id;
@@ -126,4 +147,7 @@ class DeviceRow {
   final DeviceInfo? info;
   final DateTime? lastSeenAt;
   final DateTime createdAt;
+
+  /// Mídia que a TV deve exibir, se definida.
+  final String? mediaId;
 }

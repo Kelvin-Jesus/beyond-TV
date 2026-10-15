@@ -2,6 +2,7 @@ import 'package:beyond_protocol/beyond_protocol.dart';
 import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../api/api_client.dart';
 import '../auth/auth_controller.dart';
@@ -11,6 +12,7 @@ import '../devices/remove_device_dialog.dart';
 import '../devices/rename_device_dialog.dart';
 import '../pairing/add_tv_dialog.dart';
 import '../realtime/admin_events.dart';
+import '../router.dart';
 import '../theme.dart';
 
 /// Página inicial do painel: a lista de TVs com status ao vivo.
@@ -193,6 +195,7 @@ class _DeviceTile extends ConsumerWidget {
 
     return Card(
       child: ListTile(
+        onTap: () => context.go(Routes.device(device.id)),
         leading: Tooltip(
           message: status,
           child: Semantics(
@@ -214,6 +217,19 @@ class _DeviceTile extends ConsumerWidget {
             if (subtitle.isNotEmpty) Text(subtitle),
             if (item != null)
               Text(item, maxLines: 1, overflow: TextOverflow.ellipsis),
+            Row(
+              children: [
+                const Icon(Icons.public, size: 14),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    device.content?.name ?? 'Sem conteúdo',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
         trailing: PopupMenuButton<_Action>(

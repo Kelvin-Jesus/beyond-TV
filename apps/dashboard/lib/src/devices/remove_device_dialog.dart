@@ -5,13 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../api/api_client.dart';
 import 'devices_controller.dart';
 
-/// Pede confirmação e remove a TV (o servidor revoga o token dela).
-Future<void> showRemoveDeviceDialog(
+/// Pergunta se a TV deve mesmo ser removida (ou desemparelhada).
+Future<bool> confirmRemoveDevice(
   BuildContext context,
   DeviceSummary device,
 ) async {
-  final messenger = ScaffoldMessenger.of(context);
-  final container = ProviderScope.containerOf(context);
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (_) => AlertDialog(
@@ -36,11 +34,25 @@ Future<void> showRemoveDeviceDialog(
       ],
     ),
   );
-  if (confirmed != true) return;
+  return confirmed == true;
+}
+
+/// Pede confirmação e remove a TV (o servidor revoga o token dela).
+///
+/// Devolve `true` se a TV foi removida.
+Future<bool> showRemoveDeviceDialog(
+  BuildContext context,
+  DeviceSummary device,
+) async {
+  final messenger = ScaffoldMessenger.of(context);
+  final container = ProviderScope.containerOf(context);
+  if (!await confirmRemoveDevice(context, device)) return false;
   try {
     await container.read(devicesProvider.notifier).remove(device.id);
     messenger.showSnackBar(const SnackBar(content: Text('TV removida.')));
+    return true;
   } on ApiException catch (e) {
     messenger.showSnackBar(SnackBar(content: Text(e.message)));
+    return false;
   }
 }

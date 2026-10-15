@@ -542,15 +542,15 @@ verde.
 | 5.5 | `feat(dashboard): lista TVs com status online/offline ao vivo` | ✅ |
 | 5.6 | `feat(dashboard): permite renomear e remover TV (revoga token)` | ✅ |
 
-### Fase 6 — Exibir sites (MVP) ⬜
-| # | Commit |
-|---|--------|
-| 6.1 | `feat(server): adiciona mídia do tipo url e atribuição a device` |
-| 6.2 | `feat(server): envia content.sync ao alterar conteúdo` |
-| 6.3 | `feat(tv): adiciona player WebView em tela cheia com wakelock` |
-| 6.4 | `feat(tv): persiste último manifesto para modo offline` |
-| 6.5 | `feat(server,tv): adiciona comandos reload, identify e unpair` |
-| 6.6 | `feat(dashboard): adiciona tela de detalhes da TV com URL e comandos` |
+### Fase 6 — Exibir sites (MVP) ✅
+| # | Commit | Status |
+|---|--------|--------|
+| 6.1 | `feat(server): adiciona mídia do tipo url e atribuição a device` | ✅ |
+| 6.2 | `feat(server): envia content.sync ao alterar conteúdo` | ✅ |
+| 6.3 | `feat(tv): adiciona player WebView em tela cheia com wakelock` | ✅ |
+| 6.4 | `feat(tv): persiste último manifesto para modo offline` | ✅ |
+| 6.5 | `feat(server,tv): adiciona comandos reload, identify e unpair` | ✅ |
+| 6.6 | `feat(dashboard): adiciona tela de detalhes da TV com URL e comandos` | ✅ |
 
 **Marco → tag `v0.6.0` = MVP utilizável.**
 

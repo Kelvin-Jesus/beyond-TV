@@ -1,3 +1,4 @@
+import 'content.dart';
 import 'device_info.dart';
 import 'json_fields.dart';
 
@@ -89,12 +90,14 @@ final class DeviceSummary {
     this.groupId,
     DateTime? lastSeenAt,
     this.currentItem,
+    this.content,
   })  : createdAt = createdAt.toUtc(),
         lastSeenAt = lastSeenAt?.toUtc();
 
   factory DeviceSummary.fromJson(Map<String, Object?> json) {
     final info = json.optionalField<Map<String, Object?>>('info');
     final lastSeen = json.optionalField<String>('lastSeenAt');
+    final content = json.optionalField<Map<String, Object?>>('content');
     return DeviceSummary(
       id: json.field<String>('id'),
       name: json.field<String>('name'),
@@ -104,6 +107,7 @@ final class DeviceSummary {
       groupId: json.optionalField<int>('groupId'),
       lastSeenAt: lastSeen == null ? null : json.dateField('lastSeenAt'),
       currentItem: json.optionalField<String>('currentItem'),
+      content: content == null ? null : ContentItem.fromJson(content),
     );
   }
 
@@ -124,6 +128,9 @@ final class DeviceSummary {
   /// O que a TV informou estar exibindo no último `hello`/`heartbeat`.
   final String? currentItem;
 
+  /// O que o painel mandou esta TV exibir, ou `null` se nada foi definido.
+  final ContentItem? content;
+
   DeviceSummary copyWith({
     String? name,
     bool? online,
@@ -139,6 +146,7 @@ final class DeviceSummary {
         groupId: groupId,
         lastSeenAt: lastSeenAt ?? this.lastSeenAt,
         currentItem: currentItem ?? this.currentItem,
+        content: content,
       );
 
   Map<String, Object?> toJson() => {
@@ -150,5 +158,6 @@ final class DeviceSummary {
         'groupId': groupId,
         'lastSeenAt': lastSeenAt?.toIso8601String(),
         if (currentItem != null) 'currentItem': currentItem,
+        'content': content?.toJson(),
       };
 }

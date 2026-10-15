@@ -181,11 +181,13 @@ sugerido a partir de fabricante e modelo (`Acme TV 4K`), ou `Nova TV`.
   "info": { "appVersion": "0.5.0", "manufacturer": "Acme", "model": "TV 4K" },
   "groupId": null,
   "lastSeenAt": "2026-10-14T12:05:00.000Z",
-  "currentItem": "https://example.local/painel"
+  "currentItem": "https://example.local/painel",
+  "content": { "mediaId": "9c1e…", "kind": "url", "name": "Painel de vendas", "url": "https://example.local/painel" }
 }
 ```
 
-`online` vem da memória do servidor (há um WebSocket aberto), não do banco.
+`content` é o que o painel mandou a TV exibir (`null` se nada foi
+definido). `online` vem da memória do servidor (há um WebSocket aberto), não do banco.
 `currentItem` também fica só em memória e some quando a TV desconecta.
 
 ## Tempo real (WebSocket)
@@ -250,6 +252,63 @@ salvo (o PC pode ter trocado de IP pelo DHCP).
 
 O servidor manda ping a cada 30 s nos dois canais para detectar conexões
 mortas.
+
+## Conteúdo (fase 6)
+
+Na fase 6 cada TV exibe **um site**. Um site é uma mídia do tipo `url`
+(tabela `media`, seção 8 do plano). Playlists, imagens e vídeos chegam na
+fase 7.
+
+### URLs aceitas
+
+Só `http` e `https`, com host, sem espaços e até 2048 caracteres
+(`isSafeContentUrl`). `file:`, `javascript:`, `data:` e afins são recusados
+com `400 invalid_url`, tanto no servidor quanto no painel e na TV.
+
+### Rotas
+
+| Método | Rota | Auth | Corpo | Resposta |
+|--------|------|------|-------|----------|
+| GET | `/media` | admin | — | `200 { "media": [Media…] }`, da mais nova para a mais antiga. |
+| POST | `/media` | admin | `{ "kind": "url", "name"?, "url" }` | `201 Media`. Sem `name`, usa o host da URL. |
+| PATCH | `/media/:id` | admin | `{ "name"?, "url"? }` | `200 Media`. As TVs que exibem esta mídia recebem `content.sync`. |
+| DELETE | `/media/:id` | admin | — | `204`. As TVs que a exibiam ficam sem conteúdo e recebem `content.sync` vazio. |
+| PUT | `/devices/:id/content` | admin | `{ "mediaId": "…" }`, `{ "url": "…", "name"? }` ou `{ "mediaId": null }` | `200 DeviceSummary`. Com `url`, reaproveita a mídia de mesma URL ou cria uma. `null` limpa. |
+| POST | `/devices/:id/commands` | admin | `{ "type": "reload" \| "identify" \| "unpair" }` | `202`. `409 device_offline` se a TV não está conectada (exceto `unpair`). `400 bad_request` para outro `type`. |
+
+`Media`:
+
+```json
+{ "id": "9c1e…", "kind": "url", "name": "Painel de vendas", "url": "https://example.local/painel", "createdAt": "…" }
+```
+
+Nome com 1 a 64 caracteres depois do trim. `unpair` faz o mesmo que
+`DELETE /devices/:id`, mas antes manda `cmd.unpair` para a TV.
+
+### Mensagens
+
+| Direção | `type` | `payload` |
+|---------|--------|-----------|
+| S → TV | `content.sync` | `ContentManifest`: `{ "revision": "a1b2c3d4", "items": [ContentItem…] }`. Lista vazia = "Aguardando conteúdo". |
+| S → TV | `cmd.reload` | `{}`. A TV recarrega o item atual. |
+| S → TV | `cmd.identify` | `{ "name": "Recepção", "durationSeconds": 10 }`. A TV mostra o nome em fonte gigante por cima do conteúdo. |
+| S → TV | `cmd.unpair` | `{}`. A TV apaga as credenciais e volta ao pareamento. O servidor fecha em seguida com `4401`. |
+| TV → S | `ack` | `{ "ref": "<id do envelope>" }`, para `content.sync` e comandos. O servidor só registra no log. |
+
+O servidor manda `content.sync` logo depois de cada `hello` e sempre que o
+conteúdo da TV muda. A TV compara o `revision` com o que está exibindo e
+ignora manifestos iguais.
+
+### Na TV
+
+- O último manifesto válido fica salvo em disco. Ao abrir, a TV já exibe
+  esse conteúdo, mesmo com o servidor fora do ar, e troca quando chegar um
+  `content.sync` novo.
+- Sites abrem num WebView em tela cheia, com JavaScript e cookies
+  persistentes, sem acesso a `file://` e sem *JS bridges*. Navegações para
+  esquemas que não sejam `http`/`https` são bloqueadas.
+- A tela não apaga enquanto o player está aberto (*wakelock*).
+- `currentItem` no `hello` e no `heartbeat` passa a ser a URL exibida.
 
 ## Saúde
 

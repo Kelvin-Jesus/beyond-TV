@@ -7,6 +7,9 @@ import '../auth/sessions.dart';
 import '../devices/devices.dart';
 import '../http/json.dart';
 import '../logging.dart';
+import '../media/media_store.dart';
+import '../media/media_validation.dart';
+import '../realtime/content_sync.dart';
 import '../realtime/device_hub.dart';
 
 final _log = Logger('devices');
@@ -16,25 +19,35 @@ final _log = Logger('devices');
 /// - `GET /api/v1/devices`: lista com o estado online.
 /// - `PATCH /api/v1/devices/<id>`: renomeia.
 /// - `DELETE /api/v1/devices/<id>`: remove e derruba o WebSocket da TV.
+/// - `PUT /api/v1/devices/<id>/content`: define o site exibido pela TV.
+/// - `POST /api/v1/devices/<id>/commands`: `reload`, `identify` e `unpair`.
 class DevicesApi {
   DevicesApi({
     required SessionStore sessions,
     required DeviceStore devices,
+    required MediaStore media,
     required DeviceHub hub,
+    required ContentSync sync,
   }) : _sessions = sessions,
        _devices = devices,
-       _hub = hub;
+       _media = media,
+       _hub = hub,
+       _sync = sync;
 
   final SessionStore _sessions;
   final DeviceStore _devices;
+  final MediaStore _media;
   final DeviceHub _hub;
+  final ContentSync _sync;
 
   void addRoutes(Router router) {
     final admin = const Pipeline().addMiddleware(_sessions.requireAdmin());
     router
       ..get('/api/v1/devices', admin.addHandler(_list))
       ..patch('/api/v1/devices/<id>', admin.addHandler(_rename))
-      ..delete('/api/v1/devices/<id>', admin.addHandler(_delete));
+      ..delete('/api/v1/devices/<id>', admin.addHandler(_delete))
+      ..put('/api/v1/devices/<id>/content', admin.addHandler(_setContent))
+      ..post('/api/v1/devices/<id>/commands', admin.addHandler(_command));
   }
 
   Response _list(Request request) => jsonResponse({
@@ -57,12 +70,93 @@ class DevicesApi {
   }
 
   Response _delete(Request request) {
-    final id = request.params['id']!;
+    _remove(request.params['id']!);
+    return Response(204);
+  }
+
+  /// Apaga a TV, derruba o WebSocket (4401) e avisa os dashboards.
+  void _remove(String id) {
     if (!_devices.delete(id)) throw _notFound;
     _hub.disconnect(id, WsCloseCodes.unauthorized);
     _hub.publish(MessageTypes.deviceRemoved, {'deviceId': id});
     _log.info(LogEvent('TV removida', {'deviceId': id}));
-    return Response(204);
+  }
+
+  Future<Response> _setContent(Request request) async {
+    final id = request.params['id']!;
+    final body = await readJsonObject(request);
+    final hasMediaId = body.containsKey('mediaId');
+    final hasUrl = body['url'] != null;
+    if (hasMediaId == hasUrl) {
+      throw const ApiException.badRequest(
+        'Informe "mediaId" ou "url" (apenas um).',
+      );
+    }
+    if (_devices.find(id) == null) throw _notFound;
+
+    final String? mediaId;
+    if (hasUrl) {
+      final url = validateUrl(body['url']);
+      final name = body['name'] == null
+          ? null
+          : validateMediaName(body['name']);
+      mediaId =
+          (_media.findByUrl(url) ?? _media.createUrl(url: url, name: name)).id;
+    } else {
+      final value = body['mediaId'];
+      if (value != null && value is! String) {
+        throw const ApiException.badRequest('Campo "mediaId" inválido.');
+      }
+      if (value != null && _media.find(value as String) == null) {
+        throw const ApiException.notFound('Mídia não encontrada.');
+      }
+      mediaId = value as String?;
+    }
+
+    _devices.setMedia(id, mediaId);
+    _sync.syncDevice(id);
+    final summary = _hub.summaryOf(_devices.find(id)!);
+    _hub.publish(MessageTypes.deviceState, summary.toJson());
+    return jsonResponse(summary.toJson());
+  }
+
+  Future<Response> _command(Request request) async {
+    final id = request.params['id']!;
+    final body = await readJsonObject(request);
+    final row = _devices.find(id);
+    if (row == null) throw _notFound;
+    final type = body['type'];
+    if (type is! String || !DeviceCommands.all.contains(type)) {
+      throw const ApiException.badRequest('Comando desconhecido.');
+    }
+    final online = _hub.isOnline(id);
+    if (!online && type != DeviceCommands.unpair) {
+      throw const ApiException.conflict('device_offline', 'A TV está offline.');
+    }
+
+    switch (type) {
+      case DeviceCommands.reload:
+        _hub.send(
+          id,
+          Envelope.create(MessageTypes.cmdReload, payload: const {}),
+        );
+      case DeviceCommands.identify:
+        _hub.send(
+          id,
+          Envelope.create(
+            MessageTypes.cmdIdentify,
+            payload: IdentifyPayload(name: row.name).toJson(),
+          ),
+        );
+      case DeviceCommands.unpair:
+        _hub.send(
+          id,
+          Envelope.create(MessageTypes.cmdUnpair, payload: const {}),
+        );
+        _remove(id);
+    }
+    _log.info(LogEvent('comando enviado', {'deviceId': id, 'type': type}));
+    return Response(202);
   }
 
   static const _notFound = ApiException.notFound('TV não encontrada.');

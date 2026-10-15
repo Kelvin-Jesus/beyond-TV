@@ -3,6 +3,7 @@
 /// A especificação fica em `docs/PLANO_DE_DESENVOLVIMENTO.md`, seção 7.
 library;
 
+export 'src/content.dart';
 export 'src/device_info.dart';
 export 'src/discovery.dart';
 export 'src/envelope.dart';

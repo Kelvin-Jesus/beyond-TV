@@ -27,7 +27,11 @@ void main() {
     final db = openDatabase();
     addTearDown(db.close);
     devices = DeviceStore(db, clock: clock.call);
-    hub = DeviceHub(devices: devices, clock: clock.call);
+    hub = DeviceHub(
+      devices: devices,
+      media: MediaStore(db, clock: clock.call),
+      clock: clock.call,
+    );
     id = generateId();
     devices.create(
       id: id,

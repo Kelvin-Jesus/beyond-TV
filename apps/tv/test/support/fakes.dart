@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:beyond_protocol/beyond_protocol.dart';
 import 'package:beyond_tv/src/device/credentials.dart';
+import 'package:beyond_tv/src/player/web_player.dart';
 import 'package:beyond_tv/src/device/device_info_source.dart';
 import 'package:beyond_tv/src/server/discovery.dart';
 import 'package:beyond_tv/src/server/server_address.dart';
@@ -101,3 +102,23 @@ class MemoryCredentialStore implements CredentialStore {
   @override
   Future<void> clear() async => saved = null;
 }
+
+/// Registro do player falso: quantos reloads e quais URLs foram abertas.
+class FakePlayerLog {
+  int reloads = 0;
+}
+
+class _FakePlayerController implements WebPlayerController {
+  _FakePlayerController(this.log);
+
+  final FakePlayerLog log;
+
+  @override
+  Future<void> reload() async => log.reloads++;
+}
+
+/// Player falso: mostra `WEB:<url>` e conta os reloads em [log].
+WebPlayerBuilder fakeWebPlayer(FakePlayerLog log) => (context, url, onCreated) {
+      onCreated(_FakePlayerController(log));
+      return Text('WEB:$url');
+    };

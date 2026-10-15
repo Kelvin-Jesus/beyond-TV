@@ -3,6 +3,7 @@ library;
 
 export 'src/api/auth_api.dart';
 export 'src/api/devices_api.dart';
+export 'src/api/media_api.dart';
 export 'src/api/pairing_api.dart';
 export 'src/api/setup_api.dart';
 export 'src/app.dart';
@@ -21,7 +22,10 @@ export 'src/http/json.dart';
 export 'src/http/middleware.dart';
 export 'src/http/rate_limit.dart';
 export 'src/logging.dart';
+export 'src/media/media_store.dart';
+export 'src/media/media_validation.dart';
 export 'src/pairing/pairing_codes.dart';
 export 'src/realtime/admin_socket.dart';
+export 'src/realtime/content_sync.dart';
 export 'src/realtime/device_hub.dart';
 export 'src/realtime/device_socket.dart';
