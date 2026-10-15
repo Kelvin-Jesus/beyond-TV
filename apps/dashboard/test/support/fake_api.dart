@@ -1,9 +1,12 @@
 import 'package:beyond_dashboard/src/api/api_client.dart';
 import 'package:beyond_dashboard/src/app.dart';
 import 'package:beyond_dashboard/src/auth/auth_controller.dart';
+import 'package:beyond_dashboard/src/realtime/admin_events.dart';
 import 'package:beyond_protocol/beyond_protocol.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'fake_admin_socket.dart';
 
 /// Servidor falso em memória, com as mesmas regras básicas do real.
 class FakeApi implements ApiClient {
@@ -81,6 +84,31 @@ class FakeApi implements ApiClient {
     );
   }
 
+  /// TVs que o servidor falso conhece.
+  final devices = <DeviceSummary>[];
+
+  @override
+  Uri get baseUri => Uri.parse('http://localhost:8080/');
+
+  @override
+  Future<List<DeviceSummary>> listDevices() async {
+    _maybeFail();
+    return [...devices];
+  }
+
+  @override
+  Future<DeviceSummary> renameDevice(String id, String name) async {
+    _maybeFail();
+    final i = devices.indexWhere((d) => d.id == id);
+    return devices[i] = devices[i].copyWith(name: name);
+  }
+
+  @override
+  Future<void> removeDevice(String id) async {
+    _maybeFail();
+    devices.removeWhere((d) => d.id == id);
+  }
+
   @override
   Future<PairingStatus> pairingStatus(String code) async {
     _maybeFail();
@@ -89,8 +117,14 @@ class FakeApi implements ApiClient {
   }
 }
 
-/// O dashboard completo usando [api].
-Widget dashboardWith(FakeApi api) => ProviderScope(
-      overrides: [apiClientProvider.overrideWithValue(api)],
-      child: const DashboardApp(),
-    );
+/// O dashboard completo usando [api] e o canal ao vivo falso [socket].
+Widget dashboardWith(FakeApi api, {FakeAdminSocket? socket}) {
+  final fake = socket ?? FakeAdminSocket();
+  return ProviderScope(
+    overrides: [
+      apiClientProvider.overrideWithValue(api),
+      adminSocketConnectorProvider.overrideWithValue((_) => fake),
+    ],
+    child: const DashboardApp(),
+  );
+}
