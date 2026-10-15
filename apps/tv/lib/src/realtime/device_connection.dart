@@ -38,6 +38,7 @@ class DeviceConnection extends ChangeNotifier {
     this.connector = ioConnector,
     Backoff? backoff,
     this.heartbeatEvery = heartbeatInterval,
+    this.currentItem,
     DateTime Function() now = DateTime.now,
   })  : _credentials = credentials,
         _backoff = backoff ?? Backoff(),
@@ -48,6 +49,9 @@ class DeviceConnection extends ChangeNotifier {
   final ServerDiscovery? discovery;
   final SocketConnector connector;
   final Duration heartbeatEvery;
+
+  /// O que a TV está exibindo (a URL), enviado no `hello` e no `heartbeat`.
+  final String? Function()? currentItem;
 
   /// Tempo online que faz a próxima queda recomeçar o backoff do zero.
   static const _stableAfter = Duration(seconds: 60);
@@ -146,7 +150,7 @@ class DeviceConnection extends ChangeNotifier {
     _send(
       channel,
       MessageTypes.hello,
-      HelloPayload(deviceInfo: info).toJson(),
+      HelloPayload(deviceInfo: info, currentItem: currentItem?.call()).toJson(),
     );
   }
 
@@ -157,6 +161,7 @@ class DeviceConnection extends ChangeNotifier {
         MessageTypes.heartbeat,
         HeartbeatPayload(
           uptimeSeconds: _now().difference(_startedAt).inSeconds,
+          currentItem: currentItem?.call(),
         ).toJson(),
       );
     } on Object {
@@ -170,6 +175,32 @@ class DeviceConnection extends ChangeNotifier {
     Map<String, Object?> payload,
   ) {
     channel.sink.add(Envelope.create(type, payload: payload).encode());
+  }
+
+  /// Envia [envelope] ao servidor, só se a TV está `online`.
+  void send(Envelope envelope) {
+    final channel = _channel;
+    if (_status != ConnectionStatus.online || channel == null) return;
+    try {
+      channel.sink.add(envelope.encode());
+    } on Object {
+      // Se o canal caiu, o `onDone` já está a caminho.
+    }
+  }
+
+  /// A TV foi removida pelo painel (`cmd.unpair`): para de reconectar e
+  /// vira `unauthorized`, sem esperar o `4401` do servidor.
+  void markUnauthorized() {
+    if (_disposed || _status == ConnectionStatus.unauthorized) return;
+    _retryTimer?.cancel();
+    _heartbeat?.cancel();
+    final channel = _channel;
+    _channel = null;
+    _onlineSince = null;
+    unawaited(_subscription?.cancel());
+    _subscription = null;
+    if (channel != null) unawaited(_closeQuietly(channel));
+    _setStatus(ConnectionStatus.unauthorized);
   }
 
   void _onData(Object? data) {
