@@ -7,6 +7,21 @@ o projeto usa [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.6.0] — Fase 6: exibir sites (MVP)
+
+### Adicionado
+
+- Cada TV exibe um site escolhido no painel, em tela cheia, com a tela
+  sempre ligada. Só links `http://` e `https://` são aceitos.
+- Tela de detalhes da TV no painel: status, dados do aparelho, o que ela
+  está exibindo, troca de site (por endereço ou por um site salvo) e os
+  botões Recarregar, Identificar e Desparear.
+- Identificar mostra o nome da TV em letras grandes por 10 segundos.
+- A TV guarda o último conteúdo recebido e continua exibindo se o servidor
+  cair.
+- Biblioteca de sites (`/api/v1/media`) e migração 2 do banco (tabela
+  `media`).
+
 ## [0.5.0] — Fase 5: tempo real
 
 ### Adicionado
