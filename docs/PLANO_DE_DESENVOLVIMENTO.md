@@ -304,7 +304,8 @@ erDiagram
 
     ADMIN { int id string username string password_hash }
     SESSION { string id_hash int admin_id datetime expires_at }
-    DEVICE { string id string name string token_hash int group_id string server_id json info datetime last_seen_at datetime created_at }
+    SETTINGS { string key string value }
+    DEVICE { string id string name string token_hash int group_id json info datetime last_seen_at datetime created_at }
     GROUP { int id string name }
     MEDIA { string id string kind string name string url string sha256 int size_bytes string mime }
     PLAYLIST { int id string name }
@@ -312,12 +313,17 @@ erDiagram
     SCHEDULE { int id int playlist_id string target_kind int target_id string days int start_min int end_min int priority }
 ```
 
+- `SETTINGS` guarda pares chave/valor do servidor, como o `server_id`
+  gerado na primeira execução e enviado às TVs no pareamento.
 - `MEDIA.kind` aceita `url`, `image` ou `video`. Um site é uma mídia do tipo
   `url`.
 - Resolução de conteúdo na TV: vale o **agendamento ativo de maior prioridade**.
   Sem nenhum agendamento ativo, vale a **playlist padrão** da TV ou do grupo.
-- Migrações numeradas em `apps/server/lib/src/db/migrations/0001_init.sql` e
-  seguintes, aplicadas automaticamente na inicialização.
+- Migrações numeradas em `apps/server/lib/src/db/migrations/m0001_init.dart` e
+  seguintes, com o SQL embutido no código para o executável compilado não
+  depender de arquivos externos. Elas são aplicadas automaticamente na
+  inicialização, cada uma numa transação, e a versão fica em
+  `PRAGMA user_version`. Uma migração publicada nunca é editada.
 
 ---
 
@@ -461,7 +467,7 @@ erDiagram
 
 Legenda: ⬜ a fazer · 🟨 em andamento · ✅ concluído
 
-### Fase 0 — Fundação do repositório 🟨
+### Fase 0 — Fundação do repositório ✅
 | # | Commit | Status |
 |---|--------|--------|
 | 0.1 | `chore(repo): adiciona .gitignore com proteções para repositório público` | ✅ |
@@ -475,29 +481,29 @@ Legenda: ⬜ a fazer · 🟨 em andamento · ✅ concluído
 **Pronto quando:** o repositório público estiver com documentação, regras de
 segurança e GitHub configurado (secret scanning, proteção de branch).
 
-### Fase 1 — Esqueleto do monorepo 🟨
-| # | Commit |
-|---|--------|
-| 1.1 | `build: cria workspace Dart na raiz` |
-| 1.2 | `feat(protocol): cria pacote beyond_protocol com envelope de mensagens` |
-| 1.3 | `feat(server): cria servidor shelf com rota /health` |
-| 1.4 | `feat(dashboard): cria app Flutter Web vazio` |
-| 1.5 | `feat(tv): cria app Flutter Android TV com manifesto leanback e banner` |
-| 1.6 | `ci: adiciona workflow com analyze, test e gitleaks` |
-| 1.7 | `docs: documenta como rodar cada app localmente` |
+### Fase 1 — Esqueleto do monorepo ✅
+| # | Commit | Status |
+|---|--------|--------|
+| 1.1 | `build: cria workspace Dart na raiz` | ✅ |
+| 1.2 | `feat(protocol): cria pacote beyond_protocol com envelope de mensagens` | ✅ |
+| 1.3 | `feat(server): cria servidor shelf com rota /health` | ✅ |
+| 1.4 | `feat(dashboard): cria app Flutter Web vazio` | ✅ |
+| 1.5 | `feat(tv): cria app Flutter Android TV com manifesto leanback e banner` | ✅ |
+| 1.6 | `ci: adiciona workflow com analyze, test e gitleaks` | ✅ |
+| 1.7 | `docs: documenta como rodar cada app localmente` | ✅ |
 
 **Pronto quando:** `dart run apps/server/bin/server.dart` responder `/health`, o
 dashboard abrir no Chrome, o APK de debug instalar no emulador TV e o CI estiver
 verde.
 
-### Fase 2 — Núcleo do servidor ⬜
-| # | Commit |
-|---|--------|
-| 2.1 | `feat(server): adiciona configuração por args/env (porta, pasta de dados)` |
-| 2.2 | `feat(server): adiciona SQLite com sistema de migrações` |
-| 2.3 | `feat(server): adiciona migração inicial (admin, sessões, devices, grupos)` |
-| 2.4 | `feat(server): adiciona logging estruturado e tratamento de erros` |
-| 2.5 | `feat(server): serve build estático do dashboard` |
+### Fase 2 — Núcleo do servidor ✅
+| # | Commit | Status |
+|---|--------|--------|
+| 2.1 | `feat(server): adiciona configuração por args/env (porta, pasta de dados)` | ✅ |
+| 2.2 | `feat(server): adiciona SQLite com sistema de migrações` | ✅ |
+| 2.3 | `feat(server): adiciona migração inicial (admin, sessões, devices, grupos)` | ✅ |
+| 2.4 | `feat(server): adiciona logging estruturado e tratamento de erros` | ✅ |
+| 2.5 | `feat(server): serve build estático do dashboard` | ✅ |
 
 ### Fase 3 — Autenticação do administrador ⬜
 | # | Commit |
