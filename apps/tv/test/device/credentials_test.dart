@@ -2,8 +2,10 @@ import 'package:beyond_protocol/beyond_protocol.dart';
 import 'package:beyond_tv/src/app.dart';
 import 'package:beyond_tv/src/device/credentials.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/fake_socket.dart';
 import '../support/fakes.dart';
 
 void main() {
@@ -61,12 +63,15 @@ void main() {
         credentials: MemoryCredentialStore(credentials),
         discovery: discovery,
         api: fakeApi(),
+        connector: FakeConnector().call,
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump();
 
     expect(find.text('TV pareada!'), findsOneWidget);
     expect(find.textContaining('PC-SALA'), findsOneWidget);
     expect(discovery.calls, 0);
+    await tester.pumpWidget(const SizedBox());
   });
 }
