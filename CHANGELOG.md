@@ -7,6 +7,21 @@ o projeto usa [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.5.0] — Fase 5: tempo real
+
+### Adicionado
+
+- A TV mantém um WebSocket com o servidor (`/ws/device`), autenticado pelo
+  token do pareamento, e manda um sinal de vida a cada 30 segundos.
+- Se a conexão cair, a TV tenta de novo com intervalos crescentes, de 1 s
+  até 60 s. Depois de 3 falhas ela procura o mesmo servidor na rede, caso o
+  IP do PC tenha mudado.
+- O painel lista as TVs com status online/offline ao vivo, o que cada uma
+  está exibindo e há quanto tempo foi vista (`/ws/admin`).
+- Renomear e remover TVs pelo painel. Remover revoga o token na hora e a TV
+  volta para a tela de pareamento.
+- Rotas `GET`, `PATCH` e `DELETE /api/v1/devices`.
+
 ## [0.4.0] — Fase 4: pareamento
 
 ### Adicionado

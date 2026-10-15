@@ -532,15 +532,15 @@ verde.
 
 **Marco:** a TV aparece no dashboard depois de digitar o código. 🎉
 
-### Fase 5 — Tempo real ⬜
-| # | Commit |
-|---|--------|
-| 5.1 | `feat(server): adiciona WS /ws/device autenticado por token` |
-| 5.2 | `feat(server): adiciona WS /ws/admin com eventos de status` |
-| 5.3 | `feat(tv): conecta WS com reconexão e backoff exponencial` |
-| 5.4 | `feat(tv): envia hello e heartbeat` |
-| 5.5 | `feat(dashboard): lista TVs com status online/offline ao vivo` |
-| 5.6 | `feat(dashboard): permite renomear e remover TV (revoga token)` |
+### Fase 5 — Tempo real ✅
+| # | Commit | Status |
+|---|--------|--------|
+| 5.1 | `feat(server): adiciona WS /ws/device autenticado por token` | ✅ |
+| 5.2 | `feat(server): adiciona WS /ws/admin com eventos de status` | ✅ |
+| 5.3 | `feat(tv): conecta WS com reconexão e backoff exponencial` | ✅ |
+| 5.4 | `feat(tv): envia hello e heartbeat` | ✅ |
+| 5.5 | `feat(dashboard): lista TVs com status online/offline ao vivo` | ✅ |
+| 5.6 | `feat(dashboard): permite renomear e remover TV (revoga token)` | ✅ |
 
 ### Fase 6 — Exibir sites (MVP) ⬜
 | # | Commit |
