@@ -1,5 +1,6 @@
 import 'package:beyond_protocol/beyond_protocol.dart';
 import 'package:beyond_tv/src/app.dart';
+import 'package:beyond_tv/src/content/manifest_store.dart';
 import 'package:beyond_tv/src/device/credentials.dart';
 import 'package:beyond_tv/src/realtime/backoff.dart';
 import 'package:flutter/material.dart';
@@ -120,6 +121,8 @@ void main() {
           api: fakeApi(),
           connector: connector.call,
           backoffFactory: () => Backoff(initial: const Duration(hours: 1)),
+          manifestStore: MemoryManifestStore(),
+          webPlayer: fakeWebPlayer(FakePlayerLog()),
         );
 
     testWidgets('mostra "Conectada" quando o servidor aceita', (tester) async {

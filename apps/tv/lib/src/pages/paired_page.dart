@@ -1,68 +1,19 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../realtime/device_connection.dart';
 import '../widgets/tv_page.dart';
 
-/// Exibida depois do pareamento, até o player chegar (fase 6). Também mostra
-/// a situação da conexão com o servidor.
-class PairedPage extends StatefulWidget {
-  const PairedPage({
-    super.key,
-    required this.connection,
-    required this.onUnauthorized,
-  });
+/// Estado vazio da TV pareada: ainda não há conteúdo para exibir. Mostra
+/// também a situação da conexão com o servidor.
+class PairedPage extends StatelessWidget {
+  const PairedPage({super.key, required this.connection});
 
   final DeviceConnection connection;
-
-  /// Chamado quando o servidor removeu esta TV; leva de volta ao pareamento.
-  final void Function(BuildContext context) onUnauthorized;
-
-  @override
-  State<PairedPage> createState() => _PairedPageState();
-}
-
-class _PairedPageState extends State<PairedPage> {
-  Timer? _tick;
-  bool _left = false;
-
-  DeviceConnection get _connection => widget.connection;
-
-  @override
-  void initState() {
-    super.initState();
-    _connection.addListener(_onChanged);
-    // Atualiza o "tentando de novo em N s" a cada segundo.
-    _tick = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (_connection.status == ConnectionStatus.offline) setState(() {});
-    });
-    _connection.start();
-  }
-
-  void _onChanged() {
-    if (!mounted) return;
-    if (_connection.status == ConnectionStatus.unauthorized && !_left) {
-      _left = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) widget.onUnauthorized(context);
-      });
-    }
-    setState(() {});
-  }
-
-  @override
-  void dispose() {
-    _tick?.cancel();
-    _connection.removeListener(_onChanged);
-    unawaited(_connection.dispose());
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final server = _connection.credentials.server;
+    final server = connection.credentials.server;
 
     return TvPage(
       title: 'TV pareada!',
@@ -74,7 +25,7 @@ class _PairedPageState extends State<PairedPage> {
           style: textTheme.titleLarge,
         ),
         const SizedBox(height: 24),
-        _StatusLine(connection: _connection),
+        _StatusLine(connection: connection),
       ],
     );
   }

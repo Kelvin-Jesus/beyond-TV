@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'device/credentials.dart';
 import 'device/device_info_source.dart';
-import 'pages/paired_page.dart';
+import 'content/content_controller.dart';
+import 'content/manifest_store.dart';
+import 'pages/player_page.dart';
+import 'player/web_player.dart';
 import 'pages/pairing_page.dart';
 import 'pages/server_select_page.dart';
 import 'realtime/backoff.dart';
@@ -22,17 +25,23 @@ class TvApp extends StatelessWidget {
     CredentialStore? credentials,
     SocketConnector? connector,
     this.backoffFactory,
+    ManifestStore? manifestStore,
+    WebPlayerBuilder? webPlayer,
   })  : discovery = discovery ?? const UdpServerDiscovery(),
         api = api ?? TvApi(),
         deviceInfo = deviceInfo ?? const PlatformDeviceInfoSource(),
         credentials = credentials ?? const SecureCredentialStore(),
-        connector = connector ?? ioConnector;
+        connector = connector ?? ioConnector,
+        manifestStore = manifestStore ?? FileManifestStore(),
+        webPlayer = webPlayer ?? defaultWebPlayer;
 
   final ServerDiscovery discovery;
   final TvApi api;
   final DeviceInfoSource deviceInfo;
   final CredentialStore credentials;
   final SocketConnector connector;
+  final ManifestStore manifestStore;
+  final WebPlayerBuilder webPlayer;
 
   /// Cria o backoff de cada conexão; os testes usam esperas curtas.
   final Backoff Function()? backoffFactory;
@@ -55,17 +64,29 @@ class TvApp extends StatelessWidget {
         ),
       );
 
-  Widget _paired(Credentials saved) => PairedPage(
-        connection: DeviceConnection(
-          credentials: saved,
-          deviceInfo: deviceInfo,
-          store: credentials,
-          discovery: discovery,
-          connector: connector,
-          backoff: backoffFactory?.call(),
-        ),
-        onUnauthorized: _backToPairing,
-      );
+  Widget _paired(Credentials saved) {
+    late final ContentController content;
+    final connection = DeviceConnection(
+      credentials: saved,
+      deviceInfo: deviceInfo,
+      store: credentials,
+      discovery: discovery,
+      connector: connector,
+      backoff: backoffFactory?.call(),
+      currentItem: () => content.currentUrl,
+    );
+    content = ContentController(
+      store: manifestStore,
+      connection: connection,
+      credentials: credentials,
+    );
+    return PlayerPage(
+      content: content,
+      connection: connection,
+      webPlayer: webPlayer,
+      onUnauthorized: _backToPairing,
+    );
+  }
 
   /// A TV foi removida no painel: volta à seleção de servidor.
   void _backToPairing(BuildContext context) {
