@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   beyond_protocol: any
+  clock: ^1.1.3
   flutter:
     sdk: flutter
   flutter_riverpod: ^3.4.3

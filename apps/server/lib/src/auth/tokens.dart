@@ -11,6 +11,12 @@ String generateToken() {
   return base64Url.encode(bytes).replaceAll('=', '');
 }
 
+/// Gera um identificador aleatório de 16 bytes em hexadecimal.
+String generateId() => List<int>.generate(
+  16,
+  (_) => _random.nextInt(256),
+).map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
+
 /// SHA-256 de [token] em hexadecimal: é o que vai para o banco.
 ///
 /// Como o token tem 256 bits aleatórios, um hash rápido basta (não precisa de

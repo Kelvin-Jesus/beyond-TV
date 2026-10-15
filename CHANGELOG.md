@@ -7,6 +7,22 @@ o projeto usa [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.4.0] — Fase 4: pareamento
+
+### Adicionado
+
+- Botão **Adicionar TV** no painel: gera um código de 6 caracteres válido por
+  10 minutos e avisa quando a TV pareia.
+- O servidor responde à descoberta por UDP broadcast (porta `8788/udp`,
+  configurável com `--discovery-port`).
+- `POST /api/v1/pair`: a TV troca o código por um token próprio. Códigos são
+  de uso único e cada IP tem 5 tentativas por minuto.
+- App da TV: procura servidores na rede, aceita IP manual e tem teclado na
+  tela para digitar o código com o controle remoto (D-pad).
+- A TV guarda as credenciais no armazenamento seguro do Android e, ao abrir
+  de novo, já sabe que está pareada.
+- Especificação do protocolo em `docs/protocolo.md`.
+
 ## [0.3.0] — Fase 3: autenticação do administrador
 
 ### Adicionado

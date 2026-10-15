@@ -216,7 +216,7 @@ sequenceDiagram
     D-->>Admin: Exibe código + contagem regressiva (10 min)
 
     T->>S: UDP broadcast "BEYONDTV_DISCOVER v1"
-    S-->>T: { name, host, port, serverId }
+    S-->>T: { v, name, port, serverId } (o IP é a origem do pacote)
     T-->>Admin: Lista servidores encontrados (ou IP manual)
 
     Admin->>T: Digita K7M4QX no teclado on-screen
@@ -265,6 +265,7 @@ A especificação completa fica em `docs/protocolo.md`. O resumo vem abaixo.
 | POST | `/auth/login` · `/auth/logout` | — / sessão | Login e logout com cookie de sessão. |
 | GET | `/auth/session` | admin | Usuário da sessão atual (`401` se não houver). |
 | POST | `/pairing-codes` | admin | Gera um código. |
+| GET | `/pairing-codes/:code` | admin | Situação do código (`pending`, `paired` ou `expired`). |
 | POST | `/pair` | código | A TV troca o código por um token. |
 | GET/PATCH/DELETE | `/devices[/:id]` | admin | Lista, renomeia ou remove uma TV. |
 | POST | `/devices/:id/commands` | admin | Envia `reload`, `identify`, `screenshot` ou `unpair`. |
@@ -515,19 +516,19 @@ verde.
 | 3.4 | `feat(dashboard): adiciona telas de setup inicial e login` | ✅ |
 | 3.5 | `test(server): cobre fluxos de setup, login e sessão expirada` | ✅ |
 
-### Fase 4 — Pareamento ⬜
-| # | Commit |
-|---|--------|
-| 4.1 | `feat(protocol): adiciona modelos de pareamento e DeviceInfo` |
-| 4.2 | `feat(server): gera códigos de pareamento com expiração e uso único` |
-| 4.3 | `feat(server): adiciona endpoint /pair com emissão de token` |
-| 4.4 | `feat(server): responde descoberta via UDP broadcast` |
-| 4.5 | `feat(tv): adiciona descoberta de servidor e entrada de IP manual` |
-| 4.6 | `feat(tv): adiciona tela de pareamento com teclado para D-pad` |
-| 4.7 | `feat(tv): armazena token no secure storage` |
-| 4.8 | `feat(dashboard): adiciona fluxo "Adicionar TV" com código e contador` |
-| 4.9 | `test(server): cobre código expirado, reutilizado e rate limit` |
-| 4.10 | `docs: documenta fluxo de pareamento em protocolo.md` |
+### Fase 4 — Pareamento ✅
+| # | Commit | Status |
+|---|--------|--------|
+| 4.1 | `feat(protocol): adiciona modelos de pareamento e DeviceInfo` | ✅ |
+| 4.2 | `feat(server): gera códigos de pareamento com expiração e uso único` | ✅ |
+| 4.3 | `feat(server): adiciona endpoint /pair com emissão de token` | ✅ |
+| 4.4 | `feat(server): responde descoberta via UDP broadcast` | ✅ |
+| 4.5 | `feat(tv): adiciona descoberta de servidor e entrada de IP manual` | ✅ |
+| 4.6 | `feat(tv): adiciona tela de pareamento com teclado para D-pad` | ✅ |
+| 4.7 | `feat(tv): armazena token no secure storage` | ✅ |
+| 4.8 | `feat(dashboard): adiciona fluxo "Adicionar TV" com código e contador` | ✅ |
+| 4.9 | `test(server): cobre código expirado, reutilizado e rate limit` | ✅ |
+| 4.10 | `docs: documenta fluxo de pareamento em protocolo.md` | ✅ |
 
 **Marco:** a TV aparece no dashboard depois de digitar o código. 🎉
 

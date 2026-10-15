@@ -3,6 +3,9 @@
 /// A especificação fica em `docs/PLANO_DE_DESENVOLVIMENTO.md`, seção 7.
 library;
 
+export 'src/device_info.dart';
+export 'src/discovery.dart';
 export 'src/envelope.dart';
 export 'src/message_types.dart';
+export 'src/pairing.dart';
 export 'src/protocol_exception.dart';

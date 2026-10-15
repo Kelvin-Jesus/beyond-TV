@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../auth/auth_controller.dart';
+import '../pairing/add_tv_dialog.dart';
 import '../theme.dart';
 
 /// Página inicial do painel. A lista de TVs chega nas próximas fases.
@@ -37,7 +38,26 @@ class HomePage extends ConsumerWidget {
         ],
       ),
       body: Center(
-        child: Text('Nenhuma TV pareada ainda.', style: textTheme.titleMedium),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Nenhuma TV pareada ainda.', style: textTheme.titleMedium),
+              const SizedBox(height: 8),
+              const Text(
+                'Instale o app Beyond TV na TV e clique em "Adicionar TV".',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: () => showAddTvDialog(context),
+                icon: const Icon(Icons.add),
+                label: const Text('Adicionar TV'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

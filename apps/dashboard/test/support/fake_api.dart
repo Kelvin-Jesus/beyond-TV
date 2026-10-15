@@ -1,6 +1,7 @@
 import 'package:beyond_dashboard/src/api/api_client.dart';
 import 'package:beyond_dashboard/src/app.dart';
 import 'package:beyond_dashboard/src/auth/auth_controller.dart';
+import 'package:beyond_protocol/beyond_protocol.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -61,6 +62,31 @@ class FakeApi implements ApiClient {
 
   @override
   Future<void> logout() async => loggedIn = false;
+
+  /// Códigos gerados, em ordem.
+  final codes = <String>[];
+
+  /// Situação que [pairingStatus] devolve.
+  PairingStatus status = const PairingStatus(PairingState.pending);
+  int statusCalls = 0;
+
+  @override
+  Future<PairingCode> createPairingCode() async {
+    _maybeFail();
+    final code = 'K7M4Q${codes.length + 2}';
+    codes.add(code);
+    return PairingCode(
+      code: code,
+      expiresAt: DateTime.now().add(pairingCodeTtl),
+    );
+  }
+
+  @override
+  Future<PairingStatus> pairingStatus(String code) async {
+    _maybeFail();
+    statusCalls++;
+    return status;
+  }
 }
 
 /// O dashboard completo usando [api].
