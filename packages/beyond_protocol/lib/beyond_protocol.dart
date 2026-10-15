@@ -9,3 +9,4 @@ export 'src/envelope.dart';
 export 'src/message_types.dart';
 export 'src/pairing.dart';
 export 'src/protocol_exception.dart';
+export 'src/realtime.dart';

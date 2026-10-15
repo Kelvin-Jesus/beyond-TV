@@ -160,7 +160,96 @@ sugerido a partir de fabricante e modelo (`Acme TV 4K`), ou `Nova TV`.
   `serverId`) no `flutter_secure_storage` (Android Keystore).
 - O `serverId` identifica o servidor: a TV não usa o token com um servidor
   de `serverId` diferente.
-- A conexão em tempo real com o token (`WS /ws/device`) chega na fase 5.
+- A TV usa o token na conexão em tempo real (`WS /ws/device`, abaixo).
+
+## TVs
+
+| Método | Rota | Auth | Corpo | Resposta |
+|--------|------|------|-------|----------|
+| GET | `/devices` | admin | — | `200 { "devices": [DeviceSummary…] }`, da mais nova para a mais antiga. |
+| PATCH | `/devices/:id` | admin | `{ "name" }` | `200 DeviceSummary`. `400 bad_request` se o nome tiver menos de 1 ou mais de 64 caracteres depois do trim. `404` se a TV não existe. |
+| DELETE | `/devices/:id` | admin | — | `204`. Apaga a TV (e o hash do token) e derruba o WebSocket dela com `4401`. `404` se não existe. |
+
+`DeviceSummary` (modelo em `realtime.dart`):
+
+```json
+{
+  "id": "3f2a…",
+  "name": "Recepção",
+  "online": true,
+  "createdAt": "2026-10-14T12:00:00.000Z",
+  "info": { "appVersion": "0.5.0", "manufacturer": "Acme", "model": "TV 4K" },
+  "groupId": null,
+  "lastSeenAt": "2026-10-14T12:05:00.000Z",
+  "currentItem": "https://example.local/painel"
+}
+```
+
+`online` vem da memória do servidor (há um WebSocket aberto), não do banco.
+`currentItem` também fica só em memória e some quando a TV desconecta.
+
+## Tempo real (WebSocket)
+
+Todas as mensagens usam o envelope da [seção 7 do plano](PLANO_DE_DESENVOLVIMENTO.md#7-protocolo-de-comunicação)
+(`{ v, type, id, ts, payload }`), em frames de texto. Os tipos ficam em
+`MessageTypes` e os códigos de fechamento em `WsCloseCodes`.
+
+| Código | Quando | O que o cliente faz |
+|--------|--------|---------------------|
+| `4400` | Sem `hello` em 10 s, ou mensagem que não é envelope válido. | Reconecta com backoff. |
+| `4401` | Token/sessão inválidos ou TV removida no painel. | TV: apaga as credenciais e volta ao pareamento. Dashboard: volta ao login. |
+| `4409` | Outra conexão da mesma TV substituiu esta. | Não reconecta. |
+| `4426` | Versão de protocolo (`v`) diferente. | TV mostra "Atualize o app da TV" e tenta de novo a cada 5 min. |
+
+### `WS /ws/device` (TV)
+
+1. A TV conecta em `ws://<host>:<port>/ws/device` com o cabeçalho
+   `Authorization: Bearer <deviceToken>`. O token nunca vai na URL.
+2. Token inválido: o servidor aceita o upgrade e fecha na hora com `4401`.
+   Assim a TV consegue distinguir "fui removida" de "servidor fora do ar".
+3. A primeira mensagem da TV, em até 10 s, é `hello` com `HelloPayload`:
+
+   ```json
+   { "v": 1, "type": "hello", "id": "…", "ts": "…",
+     "payload": { "deviceInfo": { "appVersion": "0.5.0", "model": "TV 4K" }, "currentItem": null } }
+   ```
+
+   O servidor grava `deviceInfo` em `devices.info`, atualiza
+   `last_seen_at`, marca a TV online e avisa os dashboards
+   (`device.online` e depois `device.state`).
+4. A cada 30 s a TV manda `heartbeat` com `HeartbeatPayload`
+   (`{ "uptimeSeconds": 120, "currentItem": … }`). Cada mensagem atualiza
+   `last_seen_at` (no banco, no máximo uma escrita por minuto por TV).
+5. Sem nenhuma mensagem por 90 s, o servidor fecha a conexão e marca a TV
+   offline. Ao fechar por qualquer motivo, os dashboards recebem
+   `device.offline`.
+6. Uma segunda conexão da mesma TV fecha a anterior com `4409`.
+
+A TV reconecta com backoff exponencial: 1 s, 2 s, 4 s… até 60 s, com
+variação aleatória de ±20%. Uma conexão que durou mais de 60 s zera o
+backoff. Depois de 3 falhas seguidas, a TV refaz a descoberta UDP e, se
+achar um servidor com o mesmo `serverId` em outro IP, atualiza o endereço
+salvo (o PC pode ter trocado de IP pelo DHCP).
+
+### `WS /ws/admin` (dashboard)
+
+1. O navegador conecta em `ws://<host>/ws/admin`; o cookie de sessão vai
+   junto. O cabeçalho `Origin` precisa ser o próprio servidor, senão o
+   upgrade é recusado com `403` (proteção contra *cross-site WebSocket
+   hijacking*). Sessão inválida: upgrade aceito e fechamento com `4401`.
+2. O dashboard não envia nada; só recebe eventos. Ao (re)conectar, ele
+   recarrega `GET /devices` para não perder eventos.
+
+| `type` | `payload` |
+|--------|-----------|
+| `device.paired` | `DeviceSummary` da TV recém-pareada. |
+| `device.online` | `{ "deviceId" }` |
+| `device.offline` | `{ "deviceId", "lastSeenAt" }` |
+| `device.state` | `DeviceSummary` atualizado (hello, heartbeat com outro `currentItem`, renomeação). |
+| `device.removed` | `{ "deviceId" }` |
+
+O servidor manda ping a cada 30 s nos dois canais para detectar conexões
+mortas.
 
 ## Saúde
 
