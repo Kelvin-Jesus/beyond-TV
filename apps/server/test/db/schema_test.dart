@@ -27,7 +27,14 @@ void main() {
         .map((row) => row['name'])
         .toList();
 
-    expect(tables, ['admins', 'devices', 'groups', 'sessions', 'settings']);
+    expect(tables, [
+      'admins',
+      'devices',
+      'groups',
+      'media',
+      'sessions',
+      'settings',
+    ]);
   });
 
   test('gera um server_id aleatório de 32 caracteres hex', () {

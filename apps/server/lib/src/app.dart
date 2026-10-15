@@ -7,6 +7,7 @@ import 'package:sqlite3/sqlite3.dart';
 
 import 'api/auth_api.dart';
 import 'api/devices_api.dart';
+import 'api/media_api.dart';
 import 'api/pairing_api.dart';
 import 'api/setup_api.dart';
 import 'auth/admins.dart';
@@ -18,8 +19,10 @@ import 'http/json.dart';
 import 'http/middleware.dart';
 import 'http/rate_limit.dart';
 import 'http/static_site.dart';
+import 'media/media_store.dart';
 import 'pairing/pairing_codes.dart';
 import 'realtime/admin_socket.dart';
+import 'realtime/content_sync.dart';
 import 'realtime/device_hub.dart';
 import 'realtime/device_socket.dart';
 
@@ -70,7 +73,9 @@ Handler buildHandler({
     ),
   ).addRoutes(router);
   final devices = DeviceStore(db, clock: clock);
-  final hub = DeviceHub(devices: devices, clock: clock);
+  final media = MediaStore(db, clock: clock);
+  final hub = DeviceHub(devices: devices, media: media, clock: clock);
+  final sync = ContentSync(devices: devices, media: media, hub: hub);
   PairingApi(
     sessions: sessions,
     codes: PairingCodeStore(clock: clock),
@@ -82,11 +87,29 @@ Handler buildHandler({
       clock: clock,
     ),
   ).addRoutes(router);
-  DevicesApi(sessions: sessions, devices: devices, hub: hub).addRoutes(router);
+  DevicesApi(
+    sessions: sessions,
+    devices: devices,
+    media: media,
+    hub: hub,
+    sync: sync,
+  ).addRoutes(router);
+  MediaApi(
+    sessions: sessions,
+    media: media,
+    devices: devices,
+    hub: hub,
+    sync: sync,
+  ).addRoutes(router);
   router
     ..get(
       WsPaths.device,
-      DeviceSocket(devices: devices, hub: hub, timeouts: timeouts).handle,
+      DeviceSocket(
+        devices: devices,
+        hub: hub,
+        sync: sync,
+        timeouts: timeouts,
+      ).handle,
     )
     ..get(WsPaths.admin, AdminSocket(sessions: sessions, hub: hub).handle);
 

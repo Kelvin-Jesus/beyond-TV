@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import '../clock.dart';
 import '../devices/devices.dart';
 import '../logging.dart';
+import '../media/media_store.dart';
 
 final _log = Logger('realtime');
 
@@ -21,14 +22,19 @@ abstract interface class DeviceConnection {
 /// Registro em memória das TVs online e ponto único de emissão de eventos
 /// para os dashboards.
 class DeviceHub {
-  DeviceHub({required DeviceStore devices, Clock clock = DateTime.now})
-    : _devices = devices,
-      _clock = clock;
+  DeviceHub({
+    required DeviceStore devices,
+    required MediaStore media,
+    Clock clock = DateTime.now,
+  }) : _devices = devices,
+       _media = media,
+       _clock = clock;
 
   /// Intervalo mínimo entre duas gravações de `last_seen_at` por TV.
   static const touchInterval = Duration(minutes: 1);
 
   final DeviceStore _devices;
+  final MediaStore _media;
   final Clock _clock;
   final _connections = <String, DeviceConnection>{};
   final _currentItems = <String, String>{};
@@ -44,20 +50,33 @@ class DeviceHub {
   String? currentItemOf(String deviceId) => _currentItems[deviceId];
 
   /// Junta os dados do banco com o estado em memória.
-  DeviceSummary summaryOf(DeviceRow row) => DeviceSummary(
-    id: row.id,
-    name: row.name,
-    online: isOnline(row.id),
-    createdAt: row.createdAt,
-    info: row.info,
-    groupId: row.groupId,
-    lastSeenAt: row.lastSeenAt,
-    currentItem: currentItemOf(row.id),
-  );
+  DeviceSummary summaryOf(DeviceRow row) {
+    final mediaId = row.mediaId;
+    final media = mediaId == null ? null : _media.find(mediaId);
+    return DeviceSummary(
+      id: row.id,
+      name: row.name,
+      online: isOnline(row.id),
+      createdAt: row.createdAt,
+      info: row.info,
+      groupId: row.groupId,
+      lastSeenAt: row.lastSeenAt,
+      currentItem: currentItemOf(row.id),
+      content: media?.toContentItem(),
+    );
+  }
 
   List<DeviceSummary> summaries() => [
     for (final row in _devices.list()) summaryOf(row),
   ];
+
+  /// Envia [envelope] à TV. Devolve `false` se ela está offline.
+  bool send(String deviceId, Envelope envelope) {
+    final conn = _connections[deviceId];
+    if (conn == null) return false;
+    conn.send(envelope);
+    return true;
+  }
 
   /// Registra a conexão da TV. Uma conexão anterior é fechada com
   /// [WsCloseCodes.replaced].
